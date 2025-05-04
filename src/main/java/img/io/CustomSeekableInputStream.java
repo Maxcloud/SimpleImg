@@ -101,6 +101,17 @@ public class CustomSeekableInputStream extends RecyclableSeekableStream {
     }
 
     /**
+     * Decodes a long with custom encoding.
+     * If the byte is -128, the next 8 bytes form the long; otherwise, the byte itself is used.
+     *
+     * @return the decoded integer
+     */
+    public long decodeLong() {
+        byte b = readByte();
+        return (b == -128) ? readLong() : (b & 0xFF);
+    }
+
+    /**
      * Decodes a float with custom encoding.
      * If the byte is -128, the next 4 bytes form the float; otherwise, the byte value is returned as a float.
      *

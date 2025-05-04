@@ -73,6 +73,9 @@ public class WzImage {
             case VT_I4:
                 stream.decodeInt();
                 break;
+            case VT_I8:
+                stream.decodeLong();
+                break;
             case VT_R4:
                 stream.decodeFloat();
                 break;
