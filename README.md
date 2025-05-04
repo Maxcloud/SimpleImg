@@ -18,7 +18,22 @@ The JSON cache is structured as a flat `Map<String, Long>`, where:
 - The **key** is the path to the property (e.g., `1234/ItemId`)
 - The **value** is the byte offset into the `.img` file.
 
-## How to Use
+## How to generate JSON files
+The above code will generate JSON files for all `.img` files in the specified directory. The generated JSON files will be stored in the same directory as the `.img` files, with the same name but with a `.json` extension.
+
+### Example usage of the library to generate JSON files.
+
+```java
+public static void main(String[] args) {
+    String wzFilePath = System.getProperty("wz.path");
+    Path root = Path.of(wzFilePath);
+
+    SimpleImg simpleImg = new SimpleImg();
+    simpleImg.dumpStringsToJson(root);
+}
+```
+
+## How to use the library
 ### Example usage of the library to read `.img` files.
 ```java
 String wzFilePath = System.getProperty("wz.path");
