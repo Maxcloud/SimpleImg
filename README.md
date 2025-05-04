@@ -1,10 +1,10 @@
-# SimpleImg
+# SimpleImg :fire:
 
 A fast, modern `.img` file parser designed for Mushroom data files, built with efficiency and simplicity in mind.
 
 Instead of parsing the entire `.img` structure every time, this library pre-processes `.img` files by dumping string references to JSON files. At runtime, it reads the JSON to resolve property paths and uses the offset to seek directly into the file, significantly improving access speed.
 
-## Features
+## :heavy_check_mark: Features
 
 - Parses `.img` files used in Mushroom data formats (e.g., `Etc.wz`, `Character.wz`).
 - Uses pre-generated `.json` files to map string paths to byte offsets.
@@ -12,14 +12,14 @@ Instead of parsing the entire `.img` structure every time, this library pre-proc
 - Auto-closes resources using `AutoCloseable` and try-with-resources.
 - Minimal allocations and overhead for quick repeated access.
 
-## Structure
+## :heavy_check_mark: Structure
 
 The JSON cache is structured as a flat `Map<String, Long>`, where:
 - The **key** is the path to the property (e.g., `1234/ItemId`)
 - The **value** is the byte offset into the `.img` file.
 
-## How to generate JSON files
-The above code will generate JSON files for all `.img` files in the specified directory. The generated JSON files will be stored in the same directory as the `.img` files, with the same name but with a `.json` extension.
+## :heavy_check_mark: How to generate JSON files
+The code below will generate JSON files for all `.img` files in the specified directory. The generated JSON files will be stored in the same directory as the `.img` files.
 
 ### Example usage of the library to generate JSON files.
 
@@ -33,8 +33,8 @@ public static void main(String[] args) {
 }
 ```
 
-## How to use the library
-### Example usage of the library to read `.img` files.
+## :heavy_check_mark: Library Usage
+##### Example usage of the library to read `.img` files.
 ```java
 String wzFilePath = System.getProperty("wz.path");
 
