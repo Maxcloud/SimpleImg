@@ -26,7 +26,7 @@ String wzFilePath = System.getProperty("wz.path");
 Path path = Path.of(wzFilePath);
 Path imgFilePath = path.resolve("Etc.wz/SetItemInfo.img");
 
-ImgCacheBuilder stringCache = new ImgCacheBuilder(imgFilePath);
+ImgCacheRepository stringCache = new ImgCacheRepository(imgFilePath);
 ImgCache imgCache = stringCache.loadFromFile();
 
 WzPathNavigator root = new WzPathNavigator("", imgCache);
