@@ -1,0 +1,11 @@
+.idea/*
+out/*
+output/*
+strings/*
+target/*
+wz/*
+
+*.docx
+*.iml
+*.rtf
+*.txt
