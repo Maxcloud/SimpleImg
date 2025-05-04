@@ -34,7 +34,7 @@ public static void main(String[] args) {
 ```
 
 ## :heavy_check_mark: Library Usage
-##### Example usage of the library to read `.img` files.
+### Example usage of the library to read `.img` files.
 ```java
 String wzFilePath = System.getProperty("wz.path");
 
