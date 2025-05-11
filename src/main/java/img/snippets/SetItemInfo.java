@@ -26,17 +26,12 @@ public class SetItemInfo {
                 WzValueReader reader;
 
                 WzPathNavigator child = root.resolve(entryId);
-
                 reader = new WzValueReader(stream, child);
 
                 String setItemName = reader.readString("setItemName");
                 int completeCount = reader.readInt("completeCount");
 
                 WzPathNavigator pathItem = child.resolve("ItemID");
-                if (pathItem == null) {
-                    continue;
-                }
-
                 for (String itemId : pathItem.getChildren()) {
 
                 }
@@ -63,9 +58,6 @@ public class SetItemInfo {
                     int incSpeed    = reader.readInt("incSpeed");
                     int incJump     = reader.readInt("incJump");
 
-                    if (incJump > 0)
-                        System.out.println("EntryId: " + entryId + " incJump: " + incJump);
-
                     WzPathNavigator pathOption = effectChild.resolve("Option");
                     for (String optionId : pathOption.getChildren()) {
                         WzPathNavigator optionChild = pathOption.resolve(optionId);
@@ -73,7 +65,6 @@ public class SetItemInfo {
 
                         int level = reader.readInt("level");
                         int option = reader.readInt("option");
-
                     }
 
                 }
