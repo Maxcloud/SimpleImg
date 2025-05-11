@@ -176,10 +176,15 @@ public class RecyclableSeekableStream implements AutoCloseable {
      * Releases the underlying {@link ByteBuf} and performs cleanup.
      */
     @Override
-    public void close() {
+    public synchronized void close() {
         if (byteBuf != null) {
-            byteBuf.release();
-            byteBuf = null;
+            try {
+                if (byteBuf.refCnt() > 0) {
+                    byteBuf.release();
+                }
+            } finally {
+                byteBuf = null;
+            }
         }
     }
 
