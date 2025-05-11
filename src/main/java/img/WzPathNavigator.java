@@ -34,6 +34,11 @@ public class WzPathNavigator {
         this.offsets = offsets;
     }
 
+    public WzPathNavigator resolve(String format, Object... args) {
+        String formattedPath = String.format(format, args);
+        return resolve(formattedPath);
+    }
+
     public WzPathNavigator resolve(String relativePath) {
         String newContext = context.isEmpty() ? relativePath : context + "/" + relativePath;
         if (!strings.containsKey(newContext)) {
