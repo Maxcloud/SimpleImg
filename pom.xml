@@ -104,10 +104,12 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <excludes>logs/**</excludes>
-                    <excludes>output/**</excludes>
-                    <excludes>target/**</excludes>
-                    <excludes>wz/**</excludes>
+                    <excludes>
+                        <exclude>logs/**</exclude>
+                        <exclude>output/**</exclude>
+                        <exclude>target/**</exclude>
+                        <exclude>wz/**</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
             <plugin>
