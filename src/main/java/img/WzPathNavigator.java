@@ -1,6 +1,5 @@
 package img;
 
-import img.record.ImgCache;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,7 +21,7 @@ public class WzPathNavigator {
         this.offsets = Collections.emptyMap();
     }
 
-    public WzPathNavigator(String context, ImgCache data) {
+    public WzPathNavigator(String context, WzImgCache data) {
         this.context = context;
         this.strings = data.stringCache();
         this.offsets = data.offsetCache();

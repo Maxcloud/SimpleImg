@@ -2,7 +2,7 @@ package img.model;
 
 import img.Variant;
 import img.cache.JsonFileRepository;
-import img.io.CustomSeekableInputStream;
+import img.io.WzSeekableInputStream;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ public class WzImage {
     public void parse(Path path) {
         if (Files.exists(path)) {
             JsonFileRepository cache = new JsonFileRepository(path);
-            try (CustomSeekableInputStream stream = new CustomSeekableInputStream(path)) {
+            try (WzSeekableInputStream stream = new WzSeekableInputStream(path)) {
                 parse("", stream, cache, 0);
                 cache.saveToFile();
             } catch (Exception e) {
@@ -29,7 +29,7 @@ public class WzImage {
         }
     }
 
-    private void parse(String filePath, CustomSeekableInputStream stream, JsonFileRepository cache, long offset) {
+    private void parse(String filePath, WzSeekableInputStream stream, JsonFileRepository cache, long offset) {
         String name = stream.decodeStringBlock(stream.readByte());
 
         switch (name) {
@@ -53,7 +53,7 @@ public class WzImage {
         }
     }
 
-    private void parse(String filePath, CustomSeekableInputStream stream, JsonFileRepository cache) {
+    private void parse(String filePath, WzSeekableInputStream stream, JsonFileRepository cache) {
         byte type = stream.readByte();
         String name = stream.decodeStringBlock(type);
 
