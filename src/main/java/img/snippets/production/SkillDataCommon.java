@@ -1,4 +1,4 @@
-package img.snippets.production.skill;
+package img.snippets.production;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

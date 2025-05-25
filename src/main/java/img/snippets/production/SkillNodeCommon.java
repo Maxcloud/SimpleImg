@@ -1,7 +1,6 @@
 package img.snippets.production;
 
 import img.ExpressionEvaluation;
-import img.snippets.production.skill.SkillDataCommon;
 import lombok.Getter;
 import lombok.Setter;
 
