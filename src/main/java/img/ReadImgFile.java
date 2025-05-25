@@ -2,7 +2,6 @@ package img;
 
 import img.cache.JsonFileRepository;
 import img.io.RecyclableSeekableStream;
-import img.record.ImgCache;
 import img.snippets.production.ImplWzDataRequest;
 import img.snippets.production.WzDataFunction;
 import lombok.NoArgsConstructor;
@@ -15,15 +14,14 @@ import java.nio.file.Path;
 public class ReadImgFile<T> {
 
     public T fromImg(ImplWzDataRequest imgDataRequest, WzDataFunction<T> bfnRequest) {
-
         Path filePath = imgDataRequest.getFilePath();
         String imgPath = imgDataRequest.getImgPath();
 
         JsonFileRepository stringCache = new JsonFileRepository(filePath);
-        ImgCache imgCache = stringCache.loadFromFile();
+        WzImgCache wzImgCache = stringCache.loadFromFile();
 
         try (RecyclableSeekableStream stream = new RecyclableSeekableStream(filePath)) {
-            WzPathNavigator root = new WzPathNavigator(imgPath, imgCache);
+            WzPathNavigator root = new WzPathNavigator(imgPath, wzImgCache);
             return bfnRequest.apply(stream, root);
         } catch (Exception e) {
             log.warn("Error reading files: {}", e.getMessage());

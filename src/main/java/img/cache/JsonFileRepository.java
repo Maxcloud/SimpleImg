@@ -2,7 +2,7 @@ package img.cache;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import img.record.ImgCache;
+import img.WzImgCache;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -39,7 +39,7 @@ public class JsonFileRepository {
 
     public void saveToFile() {
         Path outputPath = getPath().resolveSibling(getPath().getFileName() + ".json");
-        ImgCache cache = new ImgCache(this.stringToOffset, this.offsetToString);
+        WzImgCache cache = new WzImgCache(this.stringToOffset, this.offsetToString);
 
         try (FileWriter writer = new FileWriter(outputPath.toFile())) {
             gson.toJson(cache, writer);
@@ -48,12 +48,12 @@ public class JsonFileRepository {
         }
     }
 
-    public ImgCache loadFromFile() {
+    public WzImgCache loadFromFile() {
         try (FileReader reader = new FileReader(getPath().toFile() + ".json")) {
-            return gson.fromJson(reader, ImgCache.class);
+            return gson.fromJson(reader, WzImgCache.class);
         } catch (IOException io) {
             log.error("An error occurred when saving the file.", io);
-            return new ImgCache(null, null);
+            return new WzImgCache(null, null);
         }
     }
 }
