@@ -2,7 +2,7 @@ package img.cache;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import img.records.ImgCache;
+import img.record.ImgCache;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Slf4j
-public class ImgCacheRepository {
+public class JsonFileRepository {
 
     private static final Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
 
@@ -25,7 +25,7 @@ public class ImgCacheRepository {
 
     private final Path path;
 
-    public ImgCacheRepository(Path path) {
+    public JsonFileRepository(Path path) {
         this.path = path;
     }
 
