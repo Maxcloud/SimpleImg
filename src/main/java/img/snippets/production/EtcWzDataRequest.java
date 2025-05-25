@@ -1,10 +1,8 @@
 package img.snippets.production;
 
-import img.snippets.ImgDataRequest;
-
 import java.nio.file.Path;
 
-public class EtcWzDataRequest implements ImgDataRequest {
+public class EtcWzDataRequest implements ImplWzDataRequest {
 
     private final Path filePath;
 

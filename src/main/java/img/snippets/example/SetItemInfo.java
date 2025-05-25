@@ -4,12 +4,12 @@ import img.ReadImgFile;
 import img.WzPathNavigator;
 import img.WzValueReader;
 import img.snippets.production.EtcWzDataRequest;
-import img.snippets.production.SkillDataFunction;
-import img.snippets.production.SkillDataCommon;
+import img.snippets.production.WzDataFunction;
+import img.snippets.production.skills.SkillDataCommon;
 
 public class SetItemInfo {
 
-    private static final SkillDataFunction<Object> pfnCommon =
+    private static final WzDataFunction<Object> pfnCommon =
             (stream, root) -> {
         WzValueReader reader;
         SkillDataCommon common = new SkillDataCommon();

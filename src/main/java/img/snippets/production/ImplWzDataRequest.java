@@ -1,8 +1,8 @@
-package img.snippets;
+package img.snippets.production;
 
 import java.nio.file.Path;
 
-public interface ImgDataRequest {
+public interface ImplWzDataRequest {
     String getImgPath();
     Path getFilePath();
 }

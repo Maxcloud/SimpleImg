@@ -3,8 +3,8 @@ package img;
 import img.cache.JsonFileRepository;
 import img.io.RecyclableSeekableStream;
 import img.record.ImgCache;
-import img.snippets.ImgDataRequest;
-import img.snippets.production.SkillDataFunction;
+import img.snippets.production.ImplWzDataRequest;
+import img.snippets.production.WzDataFunction;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 @Slf4j
 public class ReadImgFile<T> {
 
-    public T fromImg(ImgDataRequest imgDataRequest, SkillDataFunction<T> bfnRequest) {
+    public T fromImg(ImplWzDataRequest imgDataRequest, WzDataFunction<T> bfnRequest) {
 
         Path filePath = imgDataRequest.getFilePath();
         String imgPath = imgDataRequest.getImgPath();

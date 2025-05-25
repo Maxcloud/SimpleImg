@@ -1,4 +1,4 @@
-package img.snippets.production;
+package img.snippets.production.skills;
 
 import img.ExpressionEvaluation;
 import lombok.Getter;

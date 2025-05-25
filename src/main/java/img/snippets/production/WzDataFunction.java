@@ -4,6 +4,6 @@ import img.WzPathNavigator;
 import img.io.RecyclableSeekableStream;
 
 @FunctionalInterface
-public interface SkillDataFunction<T> {
+public interface WzDataFunction<T> {
     T apply(RecyclableSeekableStream stream, WzPathNavigator root);
 }
