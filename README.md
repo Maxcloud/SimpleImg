@@ -2,7 +2,9 @@
 
 A fast, modern `.img` file parser designed for Mushroom data files, built with efficiency and simplicity in mind.
 
-Instead of parsing the entire `.img` structure every time, this library pre-processes `.img` files by dumping string references to JSON files. At runtime, it reads the JSON to resolve property paths and uses the offset to seek directly into the file, significantly improving access speed.
+Instead of parsing the entire `.img` structure every time, this library pre-processes `.img` files by dumping string
+references to JSON files. At runtime, it reads the JSON to resolve property paths and uses the offset to seek directly
+into the file, significantly improving access speed.
 
 ## :heavy_check_mark: Features
 
@@ -15,11 +17,14 @@ Instead of parsing the entire `.img` structure every time, this library pre-proc
 ## :heavy_check_mark: Structure
 
 The JSON cache is structured as a flat `Map<String, Long>`, where:
+
 - The **key** is the path to the property (e.g., `1234/ItemId`)
 - The **value** is the byte offset into the `.img` file.
 
 ## :heavy_check_mark: How to generate JSON files
-The code below will generate JSON files for all `.img` files in the specified directory. The generated JSON files will be stored in the same directory as the `.img` files.
+
+The code below will generate JSON files for all `.img` files in the specified directory. The generated JSON files will
+be stored in the same directory as the `.img` files.
 
 ### Example usage of the library to generate JSON files.
 
@@ -34,23 +39,23 @@ public static void main(String[] args) {
 ```
 
 ## :heavy_check_mark: Library Usage
+
 ### Example usage of the library to read `.img` files.
+
 ```java
 public class SetItemInfo {
 
-    /** You can replace Object with your own class, as it accepts a generic type. */
-    private static final SkillDataFunction<Object> pfnCommon = (stream, root) -> {
+    private static final WzDataFunction<SetItemInfoImg> pfnCommon = (stream, root) -> {
         WzValueReader reader;
         
-        /** Create a new instance of SkillDataCommon to store the data. */
-        SkillDataCommon common = new SkillDataCommon();
+        SetItemInfoImg setItemInfoImg = new SetItemInfoImg();
         for (String entryId : root.getChildren()) {
 
             WzPathNavigator child = root.resolve(entryId);
             reader = new WzValueReader(stream, child);
 
-            String setItemName = reader.readString("setItemName");
-            int completeCount = reader.readInt("completeCount");
+            setItemInfoImg.setItemName(reader.readString("setItemName"));
+            setItemInfoImg.setCompleteCount(reader.readInt("completeCount"));
 
             WzPathNavigator pathItem = child.resolve("ItemID");
             for (String itemId : pathItem.getChildren()) {
@@ -62,29 +67,20 @@ public class SetItemInfo {
                 WzPathNavigator effectChild = pathEffect.resolve(effectId);
                 reader = new WzValueReader(stream, effectChild);
 
-                int incPDD = reader.readInt("incPDD");
-                int incMDD = reader.readInt("incMDD");
-                int incACC = reader.readInt("incACC");
-                int incSTR = reader.readInt("incSTR");
-                int incDEX = reader.readInt("incDEX");
-                int incINT = reader.readInt("incINT");
-                int incLUK = reader.readInt("incLUK");
-                int incPAD = reader.readInt("incPAD");
-                int incMAD = reader.readInt("incMAD");
-                int incMHP = reader.readInt("incMHP");
-                int incMMP = reader.readInt("incMMP");
-                int incMHPr = reader.readInt("incMHPr");
-                int incMMPr = reader.readInt("incMMPr");
-                int incAllStat = reader.readInt("incAllStat");
-                int incSpeed = reader.readInt("incSpeed");
-                int incJump = reader.readInt("incJump");
-                
-                /** An example of how to read a string value. */
-                common.setIncPDD(incPDD);
-                
-                // or
-                
-                common.setIncPDD(reader.readInt("incPDD"));
+                setItemInfoImg.setIncPAD(reader.readInt("incPAD"));
+                setItemInfoImg.setIncMDD(reader.readInt("incMDD"));
+                setItemInfoImg.setIncACC(reader.readInt("incACC"));
+                setItemInfoImg.setIncSTR(reader.readInt("incSTR"));
+                setItemInfoImg.setIncDEX(reader.readInt("incDEX"));
+                setItemInfoImg.setIncINT(reader.readInt("incINT"));
+                setItemInfoImg.setIncLUK(reader.readInt("incLUK"));
+                setItemInfoImg.setIncMHP(reader.readInt("incMHP"));
+                setItemInfoImg.setIncMMP(reader.readInt("incMMP"));
+                setItemInfoImg.setIncMHPr(reader.readInt("incMHPr"));
+                setItemInfoImg.setIncMMPr(reader.readInt("incMMPr"));
+                setItemInfoImg.setIncAllStat(reader.readInt("incAllStat"));
+                setItemInfoImg.setIncSpeed(reader.readInt("incSpeed"));
+                setItemInfoImg.setIncJump(reader.readInt("incJump"));
 
                 WzPathNavigator pathOption = effectChild.resolve("Option");
                 for (String optionId : pathOption.getChildren()) {
@@ -98,13 +94,13 @@ public class SetItemInfo {
             }
         }
 
-        return common;
+        return setItemInfoImg;
     };
 
     public static void main(String[] args) {
         EtcWzDataRequest imgDataRequest = new EtcWzDataRequest("SetItemInfo.img");
 
-        ReadImgFile<Object> readImgFile = new ReadImgFile<>();
+        ReadImgFile<SetItemInfoImg> readImgFile = new ReadImgFile<>();
         readImgFile.fromImg(imgDataRequest, pfnCommon);
     }
 }
