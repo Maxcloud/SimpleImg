@@ -1,25 +1,15 @@
 package img;
 
-import lombok.NonNull;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.function.Function;
 
 public class ExpressionEvaluation {
 
-    public int evaluate(@NonNull String name,
-                        @NonNull WzValueReader reader,
-                        @NonNull String variable,
-                        @NonNull int level) {
-
-        String content = reader.readString(name);
-        if (content.isEmpty()) {
-            return 0;
-        }
-
-        content = normalize(content);
+    public int evaluate(String name, String variable, int level) {
+        name = normalize(name);
         try {
-            Expression expression = new ExpressionBuilder(content)
+            Expression expression = new ExpressionBuilder(name)
                     .variable(variable)
                     .functions(
                             new Function("u", 1) {
@@ -38,11 +28,10 @@ public class ExpressionEvaluation {
                     .build()
                     .setVariable(variable, level);
 
-            int result = (int) expression.evaluate();
             // System.out.println("Evaluating: [" + name + "] Result: (" + content + " with " + variable + "=" + level + " = " + result + ")");
-            return result;
+            return (int) expression.evaluate();
         } catch (Exception e) {
-            System.err.println("Failed to evaluate: " + content + " with " + variable + "=" + level);
+            System.err.println("Failed to evaluate: " + name + " with " + variable + "=" + level);
             return 0;
         }
     }
