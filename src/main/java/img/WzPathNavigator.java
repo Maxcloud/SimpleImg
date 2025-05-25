@@ -1,6 +1,6 @@
 package img;
 
-import img.records.ImgCache;
+import img.record.ImgCache;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +35,7 @@ public class WzPathNavigator {
     }
 
     public WzPathNavigator resolve(String format, Object... args) {
-        String formattedPath = String.format(format, args);
+        String formattedPath = format.formatted(args);
         return resolve(formattedPath);
     }
 
