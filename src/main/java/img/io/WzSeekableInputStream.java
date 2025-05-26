@@ -1,6 +1,6 @@
 package img.io;
 
-import img.WzVersion;
+import wz.WzVersion;
 import lombok.Getter;
 
 import java.nio.file.Path;
@@ -28,7 +28,19 @@ public class WzSeekableInputStream extends ImgSeekableInputStream {
         fileSize = readLong();
         fileStart = readInt();
         fileCopyright = readNullTerminatedAsciiString();
-        version = new WzVersion(this, 111);
+        version = new WzVersion(this);
+    }
+
+    public String decodeStringBlock(byte type) {
+        String result = null;
+        switch (type) {
+            case 0x02:
+                result = decodeStringAtOffsetAndReset(readInt() + getFileStart() + 1); break;
+            case 0x03:
+            case 0x04:
+                result = decodeString(); break;
+        }
+        return result;
     }
 
     /**

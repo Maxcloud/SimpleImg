@@ -1,19 +1,34 @@
-package img;
+package wz;
 
+import img.Config;
 import img.io.RecyclableSeekableStream;
 import lombok.Getter;
+
+import java.util.Properties;
 
 @Getter
 public class WzVersion {
 
 	private int hash;
 
-	public WzVersion(RecyclableSeekableStream stream, int version) {
-		this.hash = stream.readShort();
-		CheckAndGetVersionHash(hash, version);
-	}
+	private final Properties config = Config.getInstance().getProperties();
 
-	// Credits: https://github.com/lastbattle/Harepacker-resurrected/
+	/**
+	 * Constructs a WzVersion object from a RecyclableSeekableStream.
+	 *
+	 * @param stream The stream to read the version hash from.
+	 */
+	public WzVersion(RecyclableSeekableStream stream) {
+		this.hash = stream.readShort();
+		String version = config.getProperty("config.version");
+		CheckAndGetVersionHash(hash, Integer.parseInt(version));
+	}
+	/**
+	 * Checks the version hash and updates it if the version matches.
+	 *
+	 * @param version      The expected version number.
+	 * @param patchVersion The patch version to check against.
+	 */
 	public void CheckAndGetVersionHash(int version, int patchVersion) {
 		int hash = 0;
 		this.hash = hash;

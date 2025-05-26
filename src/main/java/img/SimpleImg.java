@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -12,13 +13,16 @@ import java.util.concurrent.TimeUnit;
 public class SimpleImg {
 
     private static ExecutorService service;
+    private static final Properties config = Config.getInstance().getProperties();
 
     public static void main(String[] args) {
-        String wzFilePath = System.getProperty("wz.path");
+        String wzFilePath = config.getProperty("config.output_directory");
         Path root = Path.of(wzFilePath);
 
+        System.out.println("Starting to dump strings to JSON. Please wait...");
         SimpleImg simpleImg = new SimpleImg();
         simpleImg.dumpStringsToJson(root);
+        System.out.println("Dumping strings to JSON completed. Please double check the logs for any errors.");
     }
 
     public void dumpStringsToJson(Path root) {

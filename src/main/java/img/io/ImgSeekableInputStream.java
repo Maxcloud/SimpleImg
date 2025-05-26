@@ -76,13 +76,11 @@ public class ImgSeekableInputStream extends RecyclableSeekableStream {
         switch (type) {
             case 0x00: // subdirectories
             case 0x73:
-                result = decodeString();
-                break;
+                result = decodeString(); break;
             case 0x01: // relative subdirectories
             case 0x1B:
                 int num1 = readInt();
-                result = decodeStringAtOffsetAndReset(num1);
-                break;
+                result = decodeStringAtOffsetAndReset(num1); break;
             default:
                 log.error("An unhandled type ({}) has been found. ", type);
                 break;

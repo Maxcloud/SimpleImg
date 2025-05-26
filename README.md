@@ -105,3 +105,5 @@ public class SetItemInfo {
     }
 }
 ```
+### Credits
+[HaRepacker-Resurrected](https://github.com/lastbattle/Harepacker-resurrected/)
