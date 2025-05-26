@@ -16,19 +16,20 @@ import java.nio.file.Path;
  */
 @Getter
 @Slf4j
-@NoArgsConstructor
 public class RecyclableSeekableStream implements AutoCloseable {
 
+    private final Path path;
     private ByteBuf byteBuf;
 
     /**
      * Loads a file into memory and wraps it with a {@link ByteBuf} for binary access.
      *
-     * @param filePath the path to the file to read
+     * @param path the path to the file to read
      */
-    public RecyclableSeekableStream(Path filePath) {
+    public RecyclableSeekableStream(Path path) {
+        this.path = path;
         try {
-            byte[] data = Files.readAllBytes(filePath);
+            byte[] data = Files.readAllBytes(path);
             byteBuf = Unpooled.wrappedBuffer(data);
         } catch (Exception e) {
             log.error("An error has occurred while loading the file to memory. ", e);
