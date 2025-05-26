@@ -2,6 +2,7 @@ package img.io;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -13,6 +14,7 @@ import java.nio.file.Path;
  * A recyclable seekable stream built on top of Netty's {@link ByteBuf}.
  * Designed for efficient in-memory binary file reading with support for random access (seeking).
  */
+@Getter
 @Slf4j
 @NoArgsConstructor
 public class RecyclableSeekableStream implements AutoCloseable {
@@ -24,12 +26,10 @@ public class RecyclableSeekableStream implements AutoCloseable {
      *
      * @param filePath the path to the file to read
      */
-    @SuppressWarnings({"deprecation"})
     public RecyclableSeekableStream(Path filePath) {
         try {
             byte[] data = Files.readAllBytes(filePath);
             byteBuf = Unpooled.wrappedBuffer(data);
-            byteBuf.order(ByteOrder.LITTLE_ENDIAN);
         } catch (Exception e) {
             log.error("An error has occurred while loading the file to memory. ", e);
         }
