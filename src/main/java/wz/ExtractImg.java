@@ -32,7 +32,7 @@ public class ExtractImg {
         String fileOutput   = config.getProperty("config.output_directory");
         String fileMerge    = config.getProperty("config.merge_folders");
 
-        Predicate<Path> isWzFile = file -> !file.endsWith(".wz");
+        Predicate<Path> isWzFile = file -> file.toString().endsWith(".wz");
         try (Stream<Path> stream = Files.list(Path.of(fileInput))) {
             stream.filter(Files::isRegularFile).filter(isWzFile).forEach(WzFile::new);
         }
