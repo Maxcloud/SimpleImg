@@ -2,17 +2,18 @@
 
 A fast, modern `.img` file parser designed for Mushroom data files, built with efficiency and simplicity in mind.
 
-Instead of parsing the entire `.img` structure every time, this library pre-processes `.img` files by dumping string
-references to JSON files. At runtime, it reads the JSON to resolve property paths and uses the offset to seek directly
-into the file, significantly improving access speed.
+Instead of parsing the entire `.img` structure on every access, this library pre-processes files by dumping string references to compact JSON metadata. At runtime, it resolves property paths using this metadata and seeks directly to the required offsets within the original file—significantly improving access speed.
+
+Now also supports full extraction of .img files, making it easy to inspect.
 
 ## :heavy_check_mark: Features
 
 - Parses `.img` files used in Mushroom data formats (e.g., `Etc.wz`, `Character.wz`).
+- Supports extracting full `.img` file contents to external format for inspection or processing.
 - Uses pre-generated `.json` files to map string paths to byte offsets.
 - High-performance file access using memory-mapped or byte-buffer-based I/O.
 - Auto-closes resources using `AutoCloseable` and try-with-resources.
-- Minimal allocations and overhead for quick repeated access.
+- Minimal object allocation and low overhead—ideal for high-frequency, real-time access.
 
 ## :heavy_check_mark: Structure
 
