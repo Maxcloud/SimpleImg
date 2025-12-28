@@ -1,6 +1,7 @@
 package img.io;
 
 import img.cryptography.WzCryptography;
+import img.util.StringWriter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,14 +15,18 @@ import java.nio.file.Path;
 @Slf4j
 public class ImgSeekableInputStream extends RecyclableSeekableStream {
     private final WzCryptography imgFileEncryption = WzCryptography.getInstance();
+    private final StringWriter stringWriter = new StringWriter();
+
+    private final Path name;
 
     /**
      * Constructs a new stream by loading the img file into memory.
      *
      * @param path the path to the binary file
      */
-    public ImgSeekableInputStream(Path path) {
+    public ImgSeekableInputStream(Path name, Path path) {
         super(path);
+        this.name = name;
     }
 
     /**
@@ -30,7 +35,7 @@ public class ImgSeekableInputStream extends RecyclableSeekableStream {
      * @param offset the offset in the file where the string is located
      * @return the decoded string
      */
-    public String decodeStringAtOffsetAndReset(int offset) {
+    public String decodeStringAtOffsetAndReset(long offset) {
         long pos = getPosition();
         try {
             seek(offset);
@@ -50,42 +55,30 @@ public class ImgSeekableInputStream extends RecyclableSeekableStream {
         byte b = readByte();
         if (b == 0x00) return "";
 
+        /*int len;
+        if (b > 0) {
+            len = b == Byte.MAX_VALUE ? readInt() : b;
+        } else {
+            len = b == Byte.MIN_VALUE ? readInt() : -b;
+        }
+
+        if (len <= 0) {
+            return "";
+        }*/
+
         int len = (b == 0x7F || b == -128) ? readInt() : (b >= 0 ? b : -b);
         if (len < 0) {
             throw new IllegalStateException("String length cannot be negative: " + len);
         }
 
         char[] str = new char[len];
-        if (b >= 0) {
+        if (b > 0) {
             decodeUnicodeString(str, len);
         } else {
             decodeNonUnicodeString(str, len);
         }
 
         return String.valueOf(str);
-    }
-
-    /**
-     * Decodes a string block depending on the block type.
-     *
-     * @param type the type indicator byte
-     * @return the decoded string, or null if the type is unknown
-     */
-    public String decodeStringBlock(byte type) {
-        String result = null;
-        switch (type) {
-            case 0x00: // subdirectories
-            case 0x73:
-                result = decodeString(); break;
-            case 0x01: // relative subdirectories
-            case 0x1B:
-                int num1 = readInt();
-                result = decodeStringAtOffsetAndReset(num1); break;
-            default:
-                log.error("An unhandled type ({}) has been found. ", type);
-                break;
-        }
-        return result;
     }
 
     /**

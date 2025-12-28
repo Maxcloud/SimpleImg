@@ -46,21 +46,21 @@ public class RecyclableSeekableStream implements AutoCloseable {
     }
 
     /**
-     * Reads a 4-byte integer (little-endian) from the current position.
-     *
-     * @return the integer read
-     */
-    public int readInt() {
-        return byteBuf.readIntLE();
-    }
-
-    /**
      * Reads a 2-byte short (little-endian) from the current position.
      *
      * @return the short read
      */
     public short readShort() {
         return byteBuf.readShortLE();
+    }
+
+    /**
+     * Reads a 4-byte integer (little-endian) from the current position.
+     *
+     * @return the integer read
+     */
+    public int readInt() {
+        return byteBuf.readIntLE();
     }
 
     /**

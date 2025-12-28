@@ -11,6 +11,11 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Extracts img files from .wz files and merges them into a single,
+ * folder structure.
+ *
+ */
 public class ExtractImg {
 
     private static final List<String> BASE_NAMES = List.of(
@@ -46,7 +51,6 @@ public class ExtractImg {
         } else {
             System.out.println("Extraction Complete.");
         }
-
     }
 
     private static void MergeFolderContents(Path outputPath) throws IOException {
@@ -61,8 +65,8 @@ public class ExtractImg {
 
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputPath)) {
                 for (Path entry : stream) {
-                    if (Files.isDirectory(entry) && numberedFolderPattern
-                            .matcher(entry.getFileName().toString()).matches()) {
+                    String path = entry.getFileName().toString();
+                    if (Files.isDirectory(entry) && numberedFolderPattern.matcher(path).matches()) {
                         MoveFolderContents(entry, target);
                     }
                 }

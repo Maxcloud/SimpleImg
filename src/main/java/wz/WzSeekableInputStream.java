@@ -1,6 +1,6 @@
-package img.io;
+package wz;
 
-import wz.WzVersion;
+import img.io.ImgSeekableInputStream;
 import lombok.Getter;
 
 import java.nio.file.Path;
@@ -22,7 +22,7 @@ public class WzSeekableInputStream extends ImgSeekableInputStream {
      * @param path the path to the binary file
      */
     public WzSeekableInputStream(Path path) {
-        super(path);
+        super(Path.of(""), path);
 
         fileIdentification = readAsciiString(4);
         fileSize = readLong();

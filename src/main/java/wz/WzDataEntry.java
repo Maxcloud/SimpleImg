@@ -1,6 +1,5 @@
 package wz;
 
-import img.io.WzSeekableInputStream;
 import lombok.Getter;
 
 @Getter

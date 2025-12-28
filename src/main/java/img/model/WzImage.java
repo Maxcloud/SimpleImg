@@ -18,7 +18,7 @@ public class WzImage {
     public void parse(Path path) {
         if (Files.exists(path)) {
             JsonFileRepository cache = new JsonFileRepository(path);
-            try (ImgSeekableInputStream stream = new ImgSeekableInputStream(path)) {
+            try (ImgSeekableInputStream stream = new ImgSeekableInputStream(path.getFileName(), path)) {
                 parse("", stream, cache, 0);
                 cache.saveToFile();
             } catch (Exception e) {
@@ -30,8 +30,9 @@ public class WzImage {
     }
 
     private void parse(String filePath, ImgSeekableInputStream stream, JsonFileRepository cache, long offset) {
-        String name = stream.decodeStringBlock(stream.readByte());
+        long position = stream.getPosition();
 
+        String name = stream.getStringWriter().internalDeserializeString(stream);
         switch (name) {
             case "Property":
                 stream.skip(1);
@@ -41,23 +42,40 @@ public class WzImage {
                     parse(filePath, stream, cache);
                 }
                 break;
+            case "Shape2D#Vector2D":
+                /*long vector_position = stream.getPosition();
+                cache.toOffset(filePath, vector_position);
+                stream.decodeInt();
+                stream.decodeInt();
+                break;*/
+            case "UOL":
+                /*long uol_position = position - 5; // adjust 5 bytes for the dispatch pointer and the variant type
+                String uol = stream.getStringWriter().internalDeserializeString(stream);
+                cache.getUolToString().put(uol_position, uol);
+                break;*/
             case "Canvas":
             case "Shape2D#Convex2D":
-            case "Shape2D#Vector2D":
             case "Sound_DX8":
-            case "UOL":
-                stream.seek(offset); break;
+                stream.seek(offset);
+                break;
             default:
                 log.warn("An unhandled property has been found: {}", name);
                 break;
         }
     }
 
+    /**
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/api/oaidl/ns-oaidl-variant">...</a>
+     * Handles the parsing of different property variants.
+     * @param filePath
+     * @param stream
+     * @param cache
+     */
     private void parse(String filePath, ImgSeekableInputStream stream, JsonFileRepository cache) {
-        byte type = stream.readByte();
-        String name = stream.decodeStringBlock(type);
+        String name = stream.getStringWriter().internalDeserializeString(stream);
 
         filePath = filePath.isEmpty() ? name : filePath + "/" + name;
+        // System.out.println("Parsing property: " + filePath);
 
         long offset = stream.getPosition();
         cache.toOffset(filePath, offset);
@@ -83,8 +101,7 @@ public class WzImage {
                 stream.readDouble();
                 break;
             case VT_BSTR:
-                byte stringType = stream.readByte();
-                String decryptedString = stream.decodeStringBlock(stringType);
+                String decryptedString = stream.getStringWriter().internalDeserializeString(stream);
                 cache.toString(offset, decryptedString);
                 break;
             case VT_DISPATCH:

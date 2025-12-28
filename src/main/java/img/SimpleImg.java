@@ -1,22 +1,25 @@
 package img;
 
+import img.model.WzImage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Properties;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * SimpleImg is a utility class that traverses a directory structure,
+ * parsing WzImage files and dumping their string data to JSON format.
+ *
+ */
 @Slf4j
 public class SimpleImg {
 
-    private static ExecutorService service;
     private static final Properties config = Config.getInstance().getProperties();
 
     public static void main(String[] args) {
-        String wzFilePath = config.getProperty("config.output_directory");
+        String wzFilePath = config.getProperty("config.re_output_directory");
         Path root = Path.of(wzFilePath);
 
         System.out.println("Starting to dump strings to JSON. Please wait...");
@@ -27,20 +30,22 @@ public class SimpleImg {
 
     public void dumpStringsToJson(Path root) {
         try {
-            service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            Files.walkFileTree(root, new ImgFileVisitor(service));
+            Files.walkFileTree(root, new SimpleFileVisitor<>() {
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    if (file.toString().endsWith(".json")) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    WzImage image = new WzImage();
+                    image.parse(file);
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         } catch (IOException e) {
             log.error("An error has occurred while walking the file tree.", e);
-        } finally {
-            service.shutdown();
-            try {
-                if (!service.awaitTermination(180L, TimeUnit.SECONDS))
-                    service.shutdownNow();
-            } catch (InterruptedException e) {
-                service.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
         }
     }
-
 }
+
+

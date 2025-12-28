@@ -1,7 +1,6 @@
 package wz;
 
 import img.Config;
-import img.io.WzSeekableInputStream;
 import io.netty.buffer.ByteBuf;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

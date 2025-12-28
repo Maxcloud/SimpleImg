@@ -2,8 +2,8 @@ package img.cache;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import img.WzImgCache;
 
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import img.record.WzImgCache;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,8 +21,9 @@ public class JsonFileRepository {
 
     private static final Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
 
-    private final Map<String, Long> stringToOffset = new LinkedHashMap<>();
-    private final Map<Long, String> offsetToString = new LinkedHashMap<>();
+    private final Map<String, Long> stringToOffset  = new LinkedHashMap<>();
+    private final Map<Long, String> offsetToString  = new LinkedHashMap<>();
+    private final Map<Long, String> uolToString     = new LinkedHashMap<>();
 
     private final Path path;
 
@@ -39,7 +41,7 @@ public class JsonFileRepository {
 
     public void saveToFile() {
         Path outputPath = getPath().resolveSibling(getPath().getFileName() + ".json");
-        WzImgCache cache = new WzImgCache(this.stringToOffset, this.offsetToString);
+        WzImgCache cache = new WzImgCache(this.stringToOffset, this.offsetToString, this.uolToString);
 
         try (FileWriter writer = new FileWriter(outputPath.toFile())) {
             gson.toJson(cache, writer);
@@ -49,11 +51,13 @@ public class JsonFileRepository {
     }
 
     public WzImgCache loadFromFile() {
-        try (FileReader reader = new FileReader(getPath().toFile() + ".json")) {
-            return gson.fromJson(reader, WzImgCache.class);
+        try (FileReader reader = new FileReader(getPath().toFile() + ".json");
+             BufferedReader bufferedReader = new BufferedReader(reader)) {
+
+            return gson.fromJson(bufferedReader, WzImgCache.class);
         } catch (IOException io) {
             log.error("An error occurred when saving the file.", io);
-            return new WzImgCache(null, null);
+            return new WzImgCache(null, null, null);
         }
     }
 }

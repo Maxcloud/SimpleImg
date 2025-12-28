@@ -1,5 +1,6 @@
 package img;
 
+import img.record.WzImgCache;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,23 +15,27 @@ public class WzPathNavigator {
     private final String context;
     private final Map<String, Long> strings;
     private final Map<Long, String> offsets;
+    private final Map<Long, String> uolStrings;
 
     public WzPathNavigator() {
         this.context = "";
         this.strings = Collections.emptyMap();
         this.offsets = Collections.emptyMap();
+        this.uolStrings = Collections.emptyMap();
     }
 
     public WzPathNavigator(String context, WzImgCache data) {
         this.context = context;
         this.strings = data.stringCache();
         this.offsets = data.offsetCache();
+        this.uolStrings = data.uolCache();
     }
 
-    private WzPathNavigator(String context, Map<String, Long> strings, Map<Long, String> offsets) {
+    private WzPathNavigator(String context, Map<String, Long> strings, Map<Long, String> offsets, Map<Long, String> uolStrings) {
         this.context = context;
         this.strings = strings;
         this.offsets = offsets;
+        this.uolStrings = uolStrings;
     }
 
     public WzPathNavigator resolve(String format, Object... args) {
@@ -45,7 +50,7 @@ public class WzPathNavigator {
             // log.debug("Path not found: {}", newContext);
             return new WzPathNavigator(); // silent fail
         }
-        return new WzPathNavigator(newContext, strings, offsets);
+        return new WzPathNavigator(newContext, strings, offsets, uolStrings);
     }
 
     public List<String> getChildren() {
@@ -71,6 +76,10 @@ public class WzPathNavigator {
 
     public String getString(long offset) {
         return getOffsets().getOrDefault(offset, "");
+    }
+
+    public String getUolString(long offset) {
+        return getUolStrings().getOrDefault(offset, "");
     }
 
 }

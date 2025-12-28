@@ -3,6 +3,7 @@ package img;
 import img.io.RecyclableSeekableStream;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.*;
 import java.util.Map;
 import java.util.Objects;
 
@@ -91,6 +92,18 @@ public record WzValueReader(RecyclableSeekableStream stream, WzPathNavigator dir
         var variant = stream.readByte();
 
         return stream.readDouble();
+    }
+
+    public Point readPoint(String property) {
+        long offset = directory().getOffset(property);
+        if (offset == -1) {
+            return new Point(0, 0);
+        }
+        stream.seek(offset);
+
+        int x = stream.readInt();
+        int y = stream.readInt();
+        return new Point(x, y);
     }
 
     /**

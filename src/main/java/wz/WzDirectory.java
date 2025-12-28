@@ -1,7 +1,5 @@
 package wz;
 
-import img.io.WzSeekableInputStream;
-
 import java.util.*;
 
 /**
