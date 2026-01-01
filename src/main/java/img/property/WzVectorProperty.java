@@ -16,7 +16,9 @@ public class WzVectorProperty implements WzProperty {
     }
 
     @Override
-    public void write(StringWriter wzStringPool, String key, ImgWritableOutputStream output) {
+    public void write(StringWriter wzStringPool, String key,
+                      ImgWritableOutputStream output) {
+
         output.writeCompressedInt(x);
         output.writeCompressedInt(y);
     }
