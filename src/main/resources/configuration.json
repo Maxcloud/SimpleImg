@@ -1,7 +1,7 @@
 {
-  "version": "8:55:1",
-  "input": "E:\\MapleStory_55\\MapleStory\\Local",
-  "output": "E:\\MapleStory_55\\MapleStory\\Local\\img",
-  "newOutput": "E:\\MapleStory_55\\MapleStory\\Local\\img_no_canvas",
+  "version": "8:145:1",
+  "input": "E:\\MapleStory_145\\MapleStory\\Local",
+  "output": "E:\\MapleStory_145\\MapleStory\\Local\\img",
+  "newOutput": "E:\\MapleStory_145\\MapleStory\\Local\\img_no_canvas",
   "mergeFolders": true
 }

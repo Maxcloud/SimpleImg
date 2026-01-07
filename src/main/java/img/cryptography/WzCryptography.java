@@ -28,10 +28,6 @@ public class WzCryptography {
         setEncryptionKey(this.iv);
     }
 
-    public byte[] getIv() {
-        return iv;
-    }
-
     public byte[] getSecret() {
         return secret;
     }
@@ -45,7 +41,7 @@ public class WzCryptography {
 
     public void setInitializationVector() {
         byte[] initial;
-        if (version <= 55 || version >= 117) {
+        if ((version <= 55 || version >= 117)) {
             initial = new byte[] {0x00, 0x00, (byte) 0x00, 0x00};
         } else {
             initial = new byte[] {0x4D, 0x23, (byte) 0xC7, 0x2B};
@@ -58,7 +54,7 @@ public class WzCryptography {
     }
 
     public void setEncryptionKey(byte[] iv) {
-        if (version <= 55 || version >= 117) {
+        if ((version <= 55 || version >= 117)) {
             this.secret = this.iv;
         } else {
             byte[] key = new byte[0x200000];
