@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.Executors;
 
 /**
  * SimpleImg is a utility class that traverses a directory structure,
@@ -45,23 +46,26 @@ public class SimpleImg {
     }
 
     public void dumpStringsToJson(Path root, byte[] secret) {
-        try {
-            Files.walkFileTree(root, new SimpleFileVisitor<>() {
+            try {
+                Files.walkFileTree(root, new SimpleFileVisitor<>() {
 
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                    if (file.toString().endsWith(".json")) {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                        if (file.toString().endsWith(".json")) {
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                               WzImage wzImage = new WzImage(secret);
+                               wzImage.parse(file);
+
                         return FileVisitResult.CONTINUE;
                     }
-                    WzImage image = new WzImage(secret);
-                    image.parse(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
-        } catch (IOException e) {
-            log.error("An error has occurred while walking the file tree.", e);
+
+                });
+            } catch (IOException e) {
+                log.error("An error has occurred while walking the file tree.", e);
+            }
         }
-    }
 }
 
 

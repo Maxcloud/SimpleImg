@@ -27,7 +27,7 @@ public class JsonFileToObject<T> {
         return path;
     }
 
-    private static Gson createDefaultGson() {
+    protected static Gson createDefaultGson() {
         return new GsonBuilder().setPrettyPrinting().create();
     }
 

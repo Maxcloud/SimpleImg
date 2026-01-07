@@ -3,6 +3,7 @@ package img.model;
 import img.Variant;
 import img.cache.JsonFileRepository;
 import img.io.ImgSeekableInputStream;
+import img.record.WzImgCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +25,18 @@ public class WzImage {
             log.error("The file {} doesn't exist.", path.getFileName()); return;
         }
 
-        JsonFileRepository cache = new JsonFileRepository(path);
+        JsonFileRepository<WzImgCache> repository =
+                new JsonFileRepository<>(path, WzImgCache.class);
+
         try (ImgSeekableInputStream stream = new ImgSeekableInputStream(path.getFileName(), path, secret)) {
-            parse("", stream, cache, 0);
-            cache.saveToFile();
+            parse("", stream, repository, 0);
+            repository.saveToFile();
         } catch (Exception e) {
             log.error("An error occurred when parsing {}.", path.getFileName(), e);
         }
     }
 
-    private void parse(String filePath, ImgSeekableInputStream stream, JsonFileRepository cache, long offset) {
+    private void parse(String filePath, ImgSeekableInputStream stream, JsonFileRepository<WzImgCache> cache, long offset) {
         long position = stream.getPosition();
 
         String name = stream.getStringWriter().internalDeserializeString(stream);
@@ -76,7 +79,7 @@ public class WzImage {
      * @param stream
      * @param cache
      */
-    private void parse(String filePath, ImgSeekableInputStream stream, JsonFileRepository cache) {
+    private void parse(String filePath, ImgSeekableInputStream stream, JsonFileRepository<WzImgCache> cache) {
         String name = stream.getStringWriter().internalDeserializeString(stream);
 
         filePath = filePath.isEmpty() ? name : filePath + "/" + name;

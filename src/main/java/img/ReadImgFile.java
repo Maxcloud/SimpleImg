@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Deprecated
 public class ReadImgFile {
 
     Logger log = LoggerFactory.getLogger(ReadImgFile.class);
@@ -29,56 +28,44 @@ public class ReadImgFile {
     }
 
     public <T> T apply(WzImplDataRequest imgDataRequest, WzDataFunction<T> fnRequest) {
-        Path filePath = imgDataRequest.getFilePath();
-        String imgPath = imgDataRequest.getImgPath();
+        Result result = getResult(imgDataRequest);
 
-        WzImgCache wzImgCache = imgCacheMap.computeIfAbsent(filePath, path -> {
-            JsonFileRepository stringCache = new JsonFileRepository(path);
-            return stringCache.loadFromFile();
-        });
-
-        WzCryptography cryptography = WzCryptography.getInstance();
-        byte[] secret = cryptography.getSecret();
-
-        try (RecyclableSeekableStream stream = new RecyclableSeekableStream(filePath, secret)) {
-            WzPathNavigator root = new WzPathNavigator(imgPath, wzImgCache);
+        try (RecyclableSeekableStream stream = new RecyclableSeekableStream(result.filePath(), result.secret())) {
+            WzPathNavigator root = new WzPathNavigator(result.imgPath(), result.wzImgCache());
             return fnRequest.apply(stream, root);
         } catch (Exception e) {
-            System.out.println(filePath.toAbsolutePath().toString());
+            System.out.println(result.filePath().toAbsolutePath());
             log.warn("Error reading files.", e);
             return null;
         }
     }
 
     public void accept(WzImplDataRequest imgDataRequest, WzDataConsumer fnRequest) {
-        Path filePath = imgDataRequest.getFilePath();
-        String imgPath = imgDataRequest.getImgPath();
-
-        WzImgCache wzImgCache = imgCacheMap.computeIfAbsent(filePath, path -> {
-            JsonFileRepository stringCache = new JsonFileRepository(path);
-            return stringCache.loadFromFile();
-        });
-
-        WzCryptography cryptography = WzCryptography.getInstance();
-        byte[] secret = cryptography.getSecret();
-
-        try (RecyclableSeekableStream stream = new RecyclableSeekableStream(filePath, secret)) {
-            WzPathNavigator root = new WzPathNavigator(imgPath, wzImgCache);
+        Result result = getResult(imgDataRequest);
+        try (RecyclableSeekableStream stream = new RecyclableSeekableStream(result.filePath(), result.secret())) {
+            WzPathNavigator root = new WzPathNavigator(result.imgPath(), result.wzImgCache());
             fnRequest.accept(stream, root);
         } catch (Exception e) {
-            System.out.println(filePath.toAbsolutePath());
+            System.out.println(result.filePath().toAbsolutePath());
             log.error("Error reading files.", e);
         }
     }
 
-    public WzPathNavigator getRoot(WzImplDataRequest implDataRequest) {
-        Path filePath = implDataRequest.getFilePath();
+    private Result getResult(WzImplDataRequest imgDataRequest) {
+        Path filePath = imgDataRequest.getFilePath();
+        String imgPath = imgDataRequest.getImgPath();
 
-        WzImgCache wzImgCache = imgCacheMap.computeIfAbsent(filePath, path -> {
-            JsonFileRepository stringCache = new JsonFileRepository(path);
-            return stringCache.loadFromFile();
-        });
+        JsonFileRepository<WzImgCache> repository =
+                new JsonFileRepository<>(filePath, WzImgCache.class);
 
-        return new WzPathNavigator("", wzImgCache);
+        WzImgCache wzImgCache = imgCacheMap.computeIfAbsent(filePath, path ->
+            repository.createObjFromFile()
+        );
+
+        WzCryptography cryptography = WzCryptography.getInstance();
+        byte[] secret = cryptography.getSecret();
+        return new Result(filePath, imgPath, wzImgCache, secret);
     }
+
+    private record Result(Path filePath, String imgPath, WzImgCache wzImgCache, byte[] secret) { }
 }

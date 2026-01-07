@@ -6,12 +6,12 @@
 
     <groupId>cdn.simpleimg</groupId>
     <artifactId>simpleimg</artifactId>
-    <version>1.4.1</version>
+    <version>1.5.1</version>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>16</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
     </properties>
 
     <distributionManagement>

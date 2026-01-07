@@ -1,8 +1,5 @@
 package img.cache;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.io.*;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -12,24 +9,16 @@ import img.record.WzImgCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JsonFileRepository {
+public class JsonFileRepository<T> extends JsonFileToObject<T> {
 
     Logger log = LoggerFactory.getLogger(JsonFileRepository.class);
-
-    private static final Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
 
     private final Map<String, Long> stringToOffset  = new LinkedHashMap<>();
     private final Map<Long, String> offsetToString  = new LinkedHashMap<>();
     private final Map<Long, String> uolToString     = new LinkedHashMap<>();
 
-    private final Path path;
-
-    public JsonFileRepository(Path path) {
-        this.path = path;
-    }
-
-    public Path getPath() {
-        return path;
+    public JsonFileRepository(Path path, Class<T> clazz) {
+        super(path, clazz);
     }
 
     public void toOffset(String name, long offset) {
@@ -46,14 +35,16 @@ public class JsonFileRepository {
         Path outputPath = getPath().resolveSibling(getPath().getFileName() + ".json");
         WzImgCache cache = new WzImgCache(this.stringToOffset, this.offsetToString, this.uolToString);
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath.toFile()))) {
-            gson.toJson(cache, writer);
+        try (FileWriter writer = new FileWriter(outputPath.toFile());
+             BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
+
+            createDefaultGson().toJson(cache, bufferedWriter);
         } catch (IOException io) {
             log.error("An error occurred when saving the file.", io);
         }
     }
 
-    public WzImgCache loadFromFile() {
+    /*public WzImgCache loadFromFile() {
         try (FileReader reader = new FileReader(getPath().toFile() + ".json");
              BufferedReader bufferedReader = new BufferedReader(reader)) {
 
@@ -62,5 +53,5 @@ public class JsonFileRepository {
             // log.error("An error occurred when saving the file.", io);
             return new WzImgCache(null, null, null);
         }
-    }
+    }*/
 }
