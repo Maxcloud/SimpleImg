@@ -2,12 +2,11 @@ package img.util;
 
 import img.io.ImgSeekableInputStream;
 import img.io.ImgWritableOutputStream;
-import lombok.extern.slf4j.Slf4j;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-@Slf4j
 public class StringWriter {
 
     public final Map<Long, String> fromArchive = new HashMap<>();
@@ -35,7 +34,7 @@ public class StringWriter {
                 }
                 break;
             default:
-                log.error("An unhandled type ({}) has been found. ", type);
+                System.out.println("Unhandled string type: (" + stream.getPath() + ")");
                 break;
         }
         return result;

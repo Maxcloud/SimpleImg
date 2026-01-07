@@ -2,11 +2,9 @@ package img.io;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.nio.ByteOrder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -14,25 +12,41 @@ import java.nio.file.Path;
  * A recyclable seekable stream built on top of Netty's {@link ByteBuf}.
  * Designed for efficient in-memory binary file reading with support for random access (seeking).
  */
-@Getter
-@Slf4j
 public class RecyclableSeekableStream implements AutoCloseable {
+
+    Logger log = LoggerFactory.getLogger(RecyclableSeekableStream.class);
 
     private final Path path;
     private ByteBuf byteBuf;
+    protected byte[] secret;
+
+
+    public Path getPath() {
+        return path;
+    }
+
+    public ByteBuf getByteBuf() {
+        return byteBuf;
+    }
+
+    public byte[] getSecret() {
+        return secret;
+    }
 
     /**
      * Loads a file into memory and wraps it with a {@link ByteBuf} for binary access.
      *
      * @param path the path to the file to read
      */
-    public RecyclableSeekableStream(Path path) {
+    public RecyclableSeekableStream(Path path, byte[] secret) {
         this.path = path;
+        this.secret = secret;
+
         try {
             byte[] data = Files.readAllBytes(path);
             byteBuf = Unpooled.wrappedBuffer(data);
         } catch (Exception e) {
-            log.error("An error has occurred while loading the file to memory. ", e);
+            // log.error("An error has occurred while loading the file to memory. ", e);
         }
     }
 
@@ -43,6 +57,18 @@ public class RecyclableSeekableStream implements AutoCloseable {
      */
     public byte readByte() {
         return byteBuf.readByte();
+    }
+
+    /**
+     * Reads a specified number of bytes from the current position.
+     *
+     * @param length the number of bytes to read
+     * @return the byte array read
+     */
+    public byte[] readBytes(int length) {
+        byte[] bytes = new byte[length];
+        byteBuf.readBytes(bytes);
+        return bytes;
     }
 
     /**
@@ -106,8 +132,7 @@ public class RecyclableSeekableStream implements AutoCloseable {
      * @return the resulting string
      */
     public String readAsciiString(int n) {
-        byte[] bytes = new byte[n];
-        byteBuf.readBytes(bytes);
+        byte[] bytes = readBytes(n);
         return new String(bytes);
     }
 

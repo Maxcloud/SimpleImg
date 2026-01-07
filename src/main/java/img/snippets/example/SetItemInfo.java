@@ -61,6 +61,10 @@ public class SetItemInfo {
         return setItemInfoImg;
     };
 
+    public WzDataFunction<SetItemInfoImg> getPfnCommon() {
+        return pfnCommon;
+    }
+
     public static void main(String[] args) {
         EtcWzDataRequest imgDataRequest = new EtcWzDataRequest("SetItemInfo.img");
 

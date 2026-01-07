@@ -1,8 +1,5 @@
 package wz;
 
-import lombok.Getter;
-
-@Getter
 public class WzDataEntry implements MapleDataEntity {
 
 	private final String name;
@@ -27,4 +24,25 @@ public class WzDataEntry implements MapleDataEntity {
 		this.parent = null;
 	}
 
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	public int getSize() {
+		return size;
+	}
+
+	public int getChecksum() {
+		return checksum;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	@Override
+	public MapleDataEntity getParent() {
+		return null;
+	}
 }

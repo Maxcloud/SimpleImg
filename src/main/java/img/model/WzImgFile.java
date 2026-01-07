@@ -1,17 +1,20 @@
 package img.model;
 
+import img.cryptography.WzNode;
 import img.io.ImgSeekableInputStream;
 import img.io.ImgWritableOutputStream;
 import img.property.WzPropertyList;
 import img.util.StringWriter;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Getter
-@Slf4j
 public class WzImgFile {
 
+    Logger log = LoggerFactory.getLogger(WzImgFile.class);
+
     private WzPropertyList property;
+
+    public WzImgFile() { }
 
     public void parse(ImgSeekableInputStream stream) {
         stream.getStringWriter().internalDeserializeString(stream);
@@ -20,7 +23,7 @@ public class WzImgFile {
     }
 
     public void write(StringWriter stringWriterPool, String key, ImgWritableOutputStream stream) {
-        stringWriterPool.internalSerializeString(stream, key, (byte) 0x73, (byte) 0x1B);
+        stringWriterPool.internalSerializeString(stream, key, WzNode.NEW_ARCHIVE, WzNode.ALREADY_EXISTS);
         property.write(stringWriterPool, key, stream);
     }
 }

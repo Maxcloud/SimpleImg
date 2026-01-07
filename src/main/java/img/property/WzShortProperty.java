@@ -3,15 +3,13 @@ package img.property;
 import img.io.ImgSeekableInputStream;
 import img.io.ImgWritableOutputStream;
 import img.util.StringWriter;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
-@Getter
 public class WzShortProperty implements WzProperty {
 
     private final byte VT_I2 = 2;
     private short data;
+
+    WzShortProperty() { }
 
     @Override
     public void read(ImgSeekableInputStream stream) {

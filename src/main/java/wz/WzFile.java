@@ -1,42 +1,49 @@
 package wz;
 
-import img.Config;
 import io.netty.buffer.ByteBuf;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@Getter
-@Slf4j
 public class WzFile {
 
-    private ExecutorService service;
-    private final Properties config = Config.getInstance().getProperties();
+    Logger log = LoggerFactory.getLogger(WzFile.class);
 
-    private final Path path;
+    private ExecutorService service;
+
+    private final Path imgInputPath;
+    private final Path imgOutputPath;
+    private final byte[] secret;
     private final WzDirectory root;
 
-    public WzFile(Path path) {
-        this.path = path;
+    public WzFile(Path imgInputPath, Path imgOutputPath, byte[] secret) {
+        this.imgInputPath = imgInputPath;
+        this.imgOutputPath = imgOutputPath;
+        this.secret = secret;
         this.root = new WzDirectory("");
         init();
     }
 
-    private void init() {
-        service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    public WzDirectory getRoot() {
+        return root;
+    }
 
+    private void init() {
+        Path target = imgOutputPath.resolve(imgInputPath.getFileName());
+
+        service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         boolean isTerminated;
-        try (WzSeekableInputStream stream = new WzSeekableInputStream(this.path)) {
-            parseImg(stream, getRoot());
+
+        try (WzSeekableInputStream stream = new WzSeekableInputStream(imgInputPath, secret)) {
+            parseImg(stream, target, getRoot());
         } catch (Exception e) {
             System.out.println("An issue occurred. " + e);
         } finally {
@@ -45,7 +52,7 @@ public class WzFile {
                 try {
                     isTerminated = service.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
                     if (isTerminated) {
-                        System.out.println("Decompressed " + path.getFileName());
+                        System.out.println("Decompressed " + imgInputPath.getFileName());
                     } else {
                         service.shutdownNow();
                         log.error("An operation failed and the service was shut down");
@@ -59,16 +66,13 @@ public class WzFile {
         }
     }
 
-    private void parseImg(WzSeekableInputStream stream, WzDirectory directory) throws IOException {
-        ByteBuf buf = stream.getByteBuf();
-
-        String imgFilePath = config.getProperty("config.output_directory");
-        Path target = Path.of(imgFilePath).resolve(stream.getPath().getFileName());
+    private void parseImg(WzSeekableInputStream stream, Path target, WzDirectory directory) throws IOException {
 
         if (!Files.exists(target)) {
             Files.createDirectories(target);
         }
 
+        ByteBuf buf = stream.getByteBuf();
         int entries = stream.decodeInt();
         for (int i = 0; i < entries; i++) {
             byte type = stream.readByte();
@@ -113,7 +117,7 @@ public class WzFile {
         }
 
         for (WzDirectory dir : directory.getSubdirectories()) {
-            parseImg(stream, dir);
+            parseImg(stream, target, dir);
         }
 
     }

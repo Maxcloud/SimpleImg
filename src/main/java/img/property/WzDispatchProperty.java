@@ -3,23 +3,16 @@ package img.property;
 import img.io.ImgSeekableInputStream;
 import img.io.ImgWritableOutputStream;
 import img.util.StringWriter;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@NoArgsConstructor
-@Getter
-@Setter
-@Slf4j
 public class WzDispatchProperty implements WzProperty {
 
-    private final byte VT_DISPATCH = 9;
     private String name = "Property";
     private final Map<String, WzProperty> lWzProperty = new LinkedHashMap<>();
+
+    public WzDispatchProperty() { }
 
     @Override
     public void read(ImgSeekableInputStream stream) {
@@ -45,7 +38,7 @@ public class WzDispatchProperty implements WzProperty {
                 property = new WzUOLProperty();
                 break;
             default:
-                log.warn("There was a missing property found.");
+                // log.warn("There was a missing property found.");
                 break;
         }
         if (property != null) {
@@ -56,8 +49,9 @@ public class WzDispatchProperty implements WzProperty {
 
     @Override
     public void write(StringWriter stringWriterPool, String key, ImgWritableOutputStream stream) {
-
         stringWriterPool.internalSerializeString(stream, key, (byte) 0x00, (byte) 0x01);
+
+        byte VT_DISPATCH = 9;
         stream.writeByte(VT_DISPATCH);
         writeDispatch(stringWriterPool, stream);
     }
@@ -92,5 +86,13 @@ public class WzDispatchProperty implements WzProperty {
         //         lengthPosition, startPosition, endPosition, totalLength);
 
         stream.getByteBuf().setIntLE(lengthPosition, totalLength);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

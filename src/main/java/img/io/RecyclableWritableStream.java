@@ -1,21 +1,27 @@
 package img.io;
 
 import io.netty.buffer.ByteBuf;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
-@Getter
-@Slf4j
 public class RecyclableWritableStream implements AutoCloseable {
 
     private ByteBuf byteBuf;
+    protected byte[] secret;
 
-    public RecyclableWritableStream(ByteBuf byteBuf) {
+    public RecyclableWritableStream(ByteBuf byteBuf, byte[] secret) {
         try {
             this.byteBuf = byteBuf;
+            this.secret = secret;
         } catch (Exception e) {
-            log.error("An error has occurred while loading the file to memory. ", e);
+            // log.error("An error has occurred while loading the file to memory. ", e);
         }
+    }
+
+    public ByteBuf getByteBuf() {
+        return byteBuf;
+    }
+
+    public byte[] getSecret() {
+        return secret;
     }
 
     public void writeByte(int value) {

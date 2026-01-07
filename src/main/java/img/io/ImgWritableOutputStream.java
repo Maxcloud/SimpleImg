@@ -1,15 +1,14 @@
 package img.io;
 
-import img.cryptography.WzCryptography;
 import io.netty.buffer.ByteBuf;
-import lombok.Getter;
 
-@Getter
+/**
+ * Custom encryption to write img files for MapleStory.
+ */
 public class ImgWritableOutputStream extends RecyclableWritableStream {
-    private final WzCryptography imgFileEncryption = WzCryptography.getInstance();
 
-    public ImgWritableOutputStream(ByteBuf byteBuf) {
-        super(byteBuf);
+    public ImgWritableOutputStream(ByteBuf byteBuf, byte[] secret) {
+        super(byteBuf, secret);
     }
 
     public void writeCompressedInt(int value) {
@@ -68,19 +67,24 @@ public class ImgWritableOutputStream extends RecyclableWritableStream {
         }
     }
 
-
     private void writeUnicodeString(String str) {
-        char[] mask = imgFileEncryption.getXorCharArray();
-        for (int i = 0; i < str.length(); i++) {
-            char c = (char) (str.charAt(i) ^ mask[i]);
+        char mask = (char) 0xAAAA;
+        int len = str.length();
+
+        for (int i = 0; i < len; i++) {
+            char c = (char) (str.charAt(i) ^ mask++);
             writeChar(c);
         }
     }
 
     private void writeNonUnicodeString(String str) {
-        byte[] xorKey = imgFileEncryption.getXorKey(str.length());
-        for (int i = 0; i < str.length(); i++) {
-            byte b = (byte) (str.charAt(i) ^ xorKey[i]);
+        byte mask = (byte) 0xAA;
+        int len = str.length();
+
+        for (int i = 0; i < len; i++, mask++) {
+            char cipherByte = (str.charAt(i));
+            byte keyByte = (byte) (secret[i % secret.length] ^ mask);
+            byte b = (byte) (cipherByte ^ keyByte);
             writeByte(b);
         }
     }

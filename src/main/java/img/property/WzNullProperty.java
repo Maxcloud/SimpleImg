@@ -3,10 +3,10 @@ package img.property;
 import img.io.ImgSeekableInputStream;
 import img.io.ImgWritableOutputStream;
 import img.util.StringWriter;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 public class WzNullProperty implements WzProperty {
+
+    WzNullProperty() { }
 
     @Override
     public void read(ImgSeekableInputStream stream) { }

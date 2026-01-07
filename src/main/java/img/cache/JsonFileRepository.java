@@ -3,21 +3,18 @@ package img.cache;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import img.record.WzImgCache;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Getter
-@Slf4j
 public class JsonFileRepository {
+
+    Logger log = LoggerFactory.getLogger(JsonFileRepository.class);
 
     private static final Gson gson = (new GsonBuilder()).setPrettyPrinting().create();
 
@@ -31,6 +28,10 @@ public class JsonFileRepository {
         this.path = path;
     }
 
+    public Path getPath() {
+        return path;
+    }
+
     public void toOffset(String name, long offset) {
         this.stringToOffset.put(name, offset);
     }
@@ -39,11 +40,13 @@ public class JsonFileRepository {
         this.offsetToString.put(offset, name);
     }
 
+    public void toUOL(long offset, String uol) { this.uolToString.put(offset, uol); }
+
     public void saveToFile() {
         Path outputPath = getPath().resolveSibling(getPath().getFileName() + ".json");
         WzImgCache cache = new WzImgCache(this.stringToOffset, this.offsetToString, this.uolToString);
 
-        try (FileWriter writer = new FileWriter(outputPath.toFile())) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath.toFile()))) {
             gson.toJson(cache, writer);
         } catch (IOException io) {
             log.error("An error occurred when saving the file.", io);
@@ -56,7 +59,7 @@ public class JsonFileRepository {
 
             return gson.fromJson(bufferedReader, WzImgCache.class);
         } catch (IOException io) {
-            log.error("An error occurred when saving the file.", io);
+            // log.error("An error occurred when saving the file.", io);
             return new WzImgCache(null, null, null);
         }
     }

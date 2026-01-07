@@ -1,13 +1,14 @@
 package img;
 
 import img.io.RecyclableSeekableStream;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.Map;
 import java.util.Objects;
 
-@Slf4j
+
 public record WzValueReader(RecyclableSeekableStream stream, WzPathNavigator directory) {
 
     public short readShort(String property) {
@@ -122,7 +123,7 @@ public record WzValueReader(RecyclableSeekableStream stream, WzPathNavigator dir
         long offset = directory().getOffset(attr);
         String result = directory().getString(offset);
         if (result == null) {
-            log.warn("Couldn't find property path ({}) in the img file.", attr);
+            // log.warn("Couldn't find property path ({}) in the img file.", attr);
         }
         return result;
     }

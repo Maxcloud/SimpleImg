@@ -2,8 +2,6 @@ package img.io;
 
 import img.cryptography.WzCryptography;
 import img.util.StringWriter;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
 
@@ -11,22 +9,63 @@ import java.nio.file.Path;
  * Custom input stream for reading encoded strings and numbers from a binary file format.
  * Extends {@link RecyclableSeekableStream} to add decryption logic using {@link WzCryptography}.
  */
-@Getter
-@Slf4j
 public class ImgSeekableInputStream extends RecyclableSeekableStream {
-    private final WzCryptography imgFileEncryption = WzCryptography.getInstance();
     private final StringWriter stringWriter = new StringWriter();
 
     private final Path name;
+
+    private final byte[] secret;
 
     /**
      * Constructs a new stream by loading the img file into memory.
      *
      * @param path the path to the binary file
      */
-    public ImgSeekableInputStream(Path name, Path path) {
-        super(path);
+    public ImgSeekableInputStream(Path name, Path path, byte[] secret) {
+        super(path, secret);
         this.name = name;
+        this.secret = secret;
+    }
+
+    public Path getName() {
+        return name;
+    }
+
+    public StringWriter getStringWriter() {
+        return stringWriter;
+    }
+
+    /**
+     * Decodes an integer with custom encoding.
+     * If the byte is -128, the next 4 bytes form the integer; otherwise, the byte itself is used.
+     *
+     * @return the decoded integer
+     */
+    public int decodeInt() {
+        byte b = readByte();
+        return (b == -128 ? readInt() : b);
+    }
+
+    /**
+     * Decodes a long with custom encoding.
+     * If the byte is -128, the next 8 bytes form the long; otherwise, the byte itself is used.
+     *
+     * @return the decoded integer
+     */
+    public long decodeLong() {
+        byte b = readByte();
+        return (b == -128) ? readLong() : (b & 0xFF);
+    }
+
+    /**
+     * Decodes a float with custom encoding.
+     * If the byte is -128, the next 4 bytes form the float; otherwise, the byte value is returned as a float.
+     *
+     * @return the decoded float
+     */
+    public float decodeFloat() {
+        byte b = readByte();
+        return (b == -128 ? readFloat() : b);
     }
 
     /**
@@ -73,58 +112,25 @@ public class ImgSeekableInputStream extends RecyclableSeekableStream {
 
         char[] str = new char[len];
         if (b > 0) {
-            decodeUnicodeString(str, len);
+            decodeUnicodeString(str);
         } else {
-            decodeNonUnicodeString(str, len);
+            decodeNonUnicodeString(str);
         }
 
         return String.valueOf(str);
     }
 
     /**
-     * Decodes an integer with custom encoding.
-     * If the byte is -128, the next 4 bytes form the integer; otherwise, the byte itself is used.
-     *
-     * @return the decoded integer
-     */
-    public int decodeInt() {
-        byte b = readByte();
-        return (b == -128 ? readInt() : b);
-    }
-
-    /**
-     * Decodes a long with custom encoding.
-     * If the byte is -128, the next 8 bytes form the long; otherwise, the byte itself is used.
-     *
-     * @return the decoded integer
-     */
-    public long decodeLong() {
-        byte b = readByte();
-        return (b == -128) ? readLong() : (b & 0xFF);
-    }
-
-    /**
-     * Decodes a float with custom encoding.
-     * If the byte is -128, the next 4 bytes form the float; otherwise, the byte value is returned as a float.
-     *
-     * @return the decoded float
-     */
-    public float decodeFloat() {
-        byte b = readByte();
-        return (b == -128 ? readFloat() : b);
-    }
-
-    /**
      * Decodes a Unicode string using a character XOR mask.
      *
      * @param str the character array to fill
-     * @param len the number of characters to decode
      */
-    private void decodeUnicodeString(char[] str, int len) {
-        char[] mask = imgFileEncryption.getXorCharArray();
+    private void decodeUnicodeString(char[] str) {
+        char mask = (char) 0xAAAA;
+        int len = str.length;
         for (int i = 0; i < len; i++) {
             char chr = readChar();
-            str[i] = (char) (chr ^ mask[i]);
+            str[i] = (char) (chr ^ mask++);
         }
     }
 
@@ -132,14 +138,15 @@ public class ImgSeekableInputStream extends RecyclableSeekableStream {
      * Decodes a non-Unicode string using a byte XOR key.
      *
      * @param str the character array to fill
-     * @param len the number of characters to decode
      */
-    private void decodeNonUnicodeString(char[] str, int len) {
-        byte[] xorKey = imgFileEncryption.getXorKey(len);
-        for (int i = 0; i < len; i++) {
-            str[i] = (char) ((readByte() ^ xorKey[i]) & 0xFF);
+    private void decodeNonUnicodeString(char[] str) {
+        byte mask = (byte) 0xAA;
+        int len = str.length;
+        for (int i = 0; i < len; i++, mask++) {
+            byte cipherByte = readByte();
+            byte keyByte = (byte) (secret[i % secret.length] ^ mask);
+            str[i] = (char) ((cipherByte ^ keyByte) & 0xFF);
         }
     }
-
 }
 

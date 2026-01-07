@@ -1,12 +1,16 @@
 package wz;
 
-import img.Config;
+import img.cache.JsonFileToObject;
+import img.cache.KeyFileRepository;
+import img.cache.DirectoryConfiguration;
+import img.cryptography.WzCryptography;
+import img.record.Version;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
-import java.util.Properties;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -17,6 +21,8 @@ import java.util.stream.Stream;
  *
  */
 public class ExtractImg {
+
+    private static final Path configFile = Path.of("src/main/resources/configuration.json");
 
     private static final List<String> BASE_NAMES = List.of(
         "Character",
@@ -31,26 +37,42 @@ public class ExtractImg {
     );
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        Properties config   = Config.getInstance().getProperties();
 
-        String fileInput    = config.getProperty("config.input_directory");
-        String fileOutput   = config.getProperty("config.output_directory");
-        String fileMerge    = config.getProperty("config.merge_folders", "false");
+        JsonFileToObject<DirectoryConfiguration> fileToObject =
+                new JsonFileToObject<>(configFile, DirectoryConfiguration.class);
+        DirectoryConfiguration directoryConfiguration = fileToObject.createObjFromFile();
+
+        Path inputDirectory = Path.of(directoryConfiguration.getInput());
+        Path outputDirectory = Path.of(directoryConfiguration.getOutput());
+        boolean isMergeMode = directoryConfiguration.isMergeFolders();
+
+        KeyFileRepository<Version> repository = new KeyFileRepository<>(Version.class);
+        repository.setSecret(directoryConfiguration.getVersion());
+
+        WzCryptography cryptography = new WzCryptography(repository);
+        byte[] secret = cryptography.getSecret();
 
         Predicate<Path> isWzFile = file -> file.toString().endsWith(".wz");
-        try (Stream<Path> stream = Files.list(Path.of(fileInput))) {
-            stream.filter(Files::isRegularFile).filter(isWzFile).forEach(WzFile::new);
+        try (Stream<Path> stream = Files.list(inputDirectory)) {
+            processFile(stream, isWzFile, inputDirectory, outputDirectory, secret);
         }
 
-        boolean isMergeMode = fileMerge.equalsIgnoreCase("true");
         if (isMergeMode) {
             System.out.println("Extraction Complete. Merging folders now.");
             Thread.sleep(1000);
 
-            MergeFolderContents(Path.of(fileOutput));
+            MergeFolderContents(outputDirectory);
         } else {
             System.out.println("Extraction Complete.");
         }
+    }
+
+    private static void processFile(Stream<Path> stream, Predicate<Path> isWzFile,
+                                    Path input, Path output, byte[] secret) {
+
+        System.out.println(input);
+        Function<Path, WzFile> nextFile = wzFile -> new WzFile(wzFile, output, secret);
+        stream.filter(Files::isRegularFile).filter(isWzFile).forEach(nextFile::apply);
     }
 
     private static void MergeFolderContents(Path outputPath) throws IOException {

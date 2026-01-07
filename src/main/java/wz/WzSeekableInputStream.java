@@ -1,11 +1,9 @@
 package wz;
 
 import img.io.ImgSeekableInputStream;
-import lombok.Getter;
 
 import java.nio.file.Path;
 
-@Getter
 public class WzSeekableInputStream extends ImgSeekableInputStream {
 
     private final int fileStart;
@@ -13,7 +11,6 @@ public class WzSeekableInputStream extends ImgSeekableInputStream {
     private final long fileSize;
     private final String fileIdentification;
     private final String fileCopyright;
-
     private final WzVersion version;
 
     /**
@@ -21,8 +18,8 @@ public class WzSeekableInputStream extends ImgSeekableInputStream {
      *
      * @param path the path to the binary file
      */
-    public WzSeekableInputStream(Path path) {
-        super(Path.of(""), path);
+    public WzSeekableInputStream(Path path, byte[] secret) {
+        super(Path.of(""), path, secret);
 
         fileIdentification = readAsciiString(4);
         fileSize = readLong();
@@ -39,6 +36,8 @@ public class WzSeekableInputStream extends ImgSeekableInputStream {
             case 0x03:
             case 0x04:
                 result = decodeString(); break;
+            default:
+                throw new IllegalArgumentException("Invalid string block type: " + type);
         }
         return result;
     }
@@ -82,5 +81,25 @@ public class WzSeekableInputStream extends ImgSeekableInputStream {
      */
     private int rotate_left(int x, byte n) {
         return (x << n) | (x >>> (32 - n));
+    }
+
+    public int getFileStart() {
+        return fileStart;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public String getFileIdentification() {
+        return fileIdentification;
+    }
+
+    public String getFileCopyright() {
+        return fileCopyright;
+    }
+
+    public WzVersion getVersion() {
+        return version;
     }
 }

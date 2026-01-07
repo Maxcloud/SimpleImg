@@ -1,28 +1,36 @@
 package wz;
 
-import img.Config;
+import img.cache.JsonFileToObject;
+import img.cache.DirectoryConfiguration;
 import img.io.RecyclableSeekableStream;
-import lombok.Getter;
 
-import java.util.Properties;
+import java.nio.file.Path;
 
-@Getter
 public class WzVersion {
+
+	private static final Path configFile = Path.of("src/main/resources/configuration.json");
 
 	private int hash;
 
-	private final Properties config = Config.getInstance().getProperties();
-
-	/**
+    /**
 	 * Constructs a WzVersion object from a RecyclableSeekableStream.
 	 *
 	 * @param stream The stream to read the version hash from.
 	 */
 	public WzVersion(RecyclableSeekableStream stream) {
+		JsonFileToObject<DirectoryConfiguration> fileToObject =
+				new JsonFileToObject<>(configFile, DirectoryConfiguration.class);
+		DirectoryConfiguration directoryConfiguration = fileToObject.createObjFromFile();
+		String[] splits = directoryConfiguration.getVersion().split(":", 3);
+
 		this.hash = stream.readShort();
-		String version = config.getProperty("config.version");
-		CheckAndGetVersionHash(hash, Integer.parseInt(version));
+		CheckAndGetVersionHash(hash, Integer.parseInt(splits[1]));
 	}
+
+	public int getHash() {
+		return hash;
+	}
+
 	/**
 	 * Checks the version hash and updates it if the version matches.
 	 *

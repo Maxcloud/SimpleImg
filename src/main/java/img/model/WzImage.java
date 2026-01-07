@@ -3,29 +3,33 @@ package img.model;
 import img.Variant;
 import img.cache.JsonFileRepository;
 import img.io.ImgSeekableInputStream;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Getter
-@Setter
-@Slf4j
 public class WzImage {
 
+    Logger log = LoggerFactory.getLogger(WzImage.class);
+
+    private final byte[] secret;
+
+    public WzImage(byte[] secret) {
+        this.secret = secret;
+    }
+
     public void parse(Path path) {
-        if (Files.exists(path)) {
-            JsonFileRepository cache = new JsonFileRepository(path);
-            try (ImgSeekableInputStream stream = new ImgSeekableInputStream(path.getFileName(), path)) {
-                parse("", stream, cache, 0);
-                cache.saveToFile();
-            } catch (Exception e) {
-                log.error("An error occurred when parsing {}.", path.getFileName(), e);
-            }
-        } else {
-            log.error("The file {} doesn't exist.", path.getFileName());
+        if (!Files.exists(path)) {
+            log.error("The file {} doesn't exist.", path.getFileName()); return;
+        }
+
+        JsonFileRepository cache = new JsonFileRepository(path);
+        try (ImgSeekableInputStream stream = new ImgSeekableInputStream(path.getFileName(), path, secret)) {
+            parse("", stream, cache, 0);
+            cache.saveToFile();
+        } catch (Exception e) {
+            log.error("An error occurred when parsing {}.", path.getFileName(), e);
         }
     }
 
@@ -50,6 +54,7 @@ public class WzImage {
                 break;*/
             case "UOL":
                 /*long uol_position = position - 5; // adjust 5 bytes for the dispatch pointer and the variant type
+                stream.skip(1); // variant type
                 String uol = stream.getStringWriter().internalDeserializeString(stream);
                 cache.getUolToString().put(uol_position, uol);
                 break;*/
@@ -89,6 +94,7 @@ public class WzImage {
                 stream.readShort();
                 break;
             case VT_I4:
+            case VT_UI4:
                 stream.decodeInt();
                 break;
             case VT_I8:
