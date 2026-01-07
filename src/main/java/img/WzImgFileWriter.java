@@ -30,11 +30,6 @@ public class WzImgFileWriter {
     public void parse(Path inputFileName) throws IOException {
         ByteBuf byteBuf = Unpooled.buffer();
 
-        System.out.println("Processing file: " + inputFileName.getFileName());
-        if (inputFileName.getFileName().equals(Path.of("2220000.img")))
-            System.out.println("Debug here");
-
-
         if (!Files.exists(inputFileName)) {
             log.error("The file {} doesn't exist.", inputFileName.getFileName());
             return;
