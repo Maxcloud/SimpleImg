@@ -21,10 +21,13 @@ public class WzVersion {
 		JsonFileToObject<DirectoryConfiguration> fileToObject =
 				new JsonFileToObject<>(configFile, DirectoryConfiguration.class);
 		DirectoryConfiguration directoryConfiguration = fileToObject.createObjFromFile();
-		String[] splits = directoryConfiguration.getVersion().split(":", 3);
+
+		String version = directoryConfiguration.getVersion();
+		String[] parts = version.split(":", 3);
+		int mVersion = Integer.parseInt(parts[1]);
 
 		this.hash = stream.readShort();
-		CheckAndGetVersionHash(hash, Integer.parseInt(splits[1]));
+		CheckAndGetVersionHash(hash, mVersion);
 	}
 
 	public int getHash() {
