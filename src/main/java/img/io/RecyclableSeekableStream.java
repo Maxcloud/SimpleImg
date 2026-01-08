@@ -46,7 +46,7 @@ public class RecyclableSeekableStream implements AutoCloseable {
             byte[] data = Files.readAllBytes(path);
             byteBuf = Unpooled.wrappedBuffer(data);
         } catch (Exception e) {
-            // log.error("An error has occurred while loading the file to memory. ", e);
+            log.error("An error has occurred while loading the file to memory. ", e);
         }
     }
 

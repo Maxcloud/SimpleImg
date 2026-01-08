@@ -1,8 +1,12 @@
 package img.io;
 
 import io.netty.buffer.ByteBuf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RecyclableWritableStream implements AutoCloseable {
+
+    Logger log = LoggerFactory.getLogger(RecyclableWritableStream.class);
 
     private ByteBuf byteBuf;
     protected byte[] secret;
@@ -12,7 +16,7 @@ public class RecyclableWritableStream implements AutoCloseable {
             this.byteBuf = byteBuf;
             this.secret = secret;
         } catch (Exception e) {
-            // log.error("An error has occurred while loading the file to memory. ", e);
+            log.error("An error has occurred while loading the file to memory. ", e);
         }
     }
 
