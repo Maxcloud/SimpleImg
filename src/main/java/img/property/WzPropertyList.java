@@ -33,7 +33,9 @@ public class WzPropertyList implements WzProperty {
         byte variant = stream.readByte();
 
         WzProperty property = getWzProperty(variant);
-
+        if (property == null) {
+            return;
+        }
 
         property.read(stream);
 
@@ -54,7 +56,7 @@ public class WzPropertyList implements WzProperty {
         try {
             variant_name = Variant.fromByte(variant);
         } catch (Exception e) {
-            System.out.println("Skipping file,  property variant not found: " + variant);
+            System.out.println("Skipping file, property variant not found: " + variant);
         }
 
         return switch (variant_name) {

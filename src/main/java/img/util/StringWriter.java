@@ -3,7 +3,6 @@ package img.util;
 import img.io.ImgSeekableInputStream;
 import img.io.ImgWritableOutputStream;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
