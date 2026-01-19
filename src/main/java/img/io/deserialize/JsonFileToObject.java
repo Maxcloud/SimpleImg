@@ -1,4 +1,4 @@
-package img.cache;
+package img.io.deserialize;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

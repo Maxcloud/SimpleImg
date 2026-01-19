@@ -1,4 +1,4 @@
-package img.cache;
+package img.configuration;
 
 public class DirectoryConfiguration {
 

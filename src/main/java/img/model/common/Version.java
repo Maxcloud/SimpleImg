@@ -1,4 +1,4 @@
-package img.record;
+package img.model.common;
 
 import java.util.Map;
 

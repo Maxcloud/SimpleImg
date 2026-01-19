@@ -1,4 +1,4 @@
-package img.cryptography;
+package wz;
 
 public class WzNode {
     public static final byte NEW_ARCHIVE = 0x73;

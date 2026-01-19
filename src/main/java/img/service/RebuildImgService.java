@@ -1,10 +1,11 @@
-package img;
+package img.service;
 
-import img.cache.DirectoryConfiguration;
-import img.cache.JsonFileToObject;
-import img.cache.KeyFileRepository;
-import img.cryptography.WzCryptography;
-import img.record.Version;
+import img.WzImgFileWriter;
+import img.configuration.DirectoryConfiguration;
+import img.io.deserialize.JsonFileToObject;
+import img.io.repository.KeyFileRepository;
+import img.crypto.WzCryptography;
+import img.model.common.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +21,9 @@ import java.nio.file.attribute.BasicFileAttributes;
  * structure and processes each img file, and writes the output
  * without canvas properties.
  */
-public class RebuildImgWithNoCanvas {
+public class RebuildImgService {
 
-    Logger log = LoggerFactory.getLogger(RebuildImgWithNoCanvas.class);
+    Logger log = LoggerFactory.getLogger(RebuildImgService.class);
 
     private static final Path configFile = Path.of("src/main/resources/configuration.json");
 
@@ -49,8 +50,8 @@ public class RebuildImgWithNoCanvas {
         secret = cryptography.getSecret();
 
         System.out.println("Starting to re-write img files without canvas properties. Please wait...");
-        RebuildImgWithNoCanvas rebuildImgWithNoCanvas = new RebuildImgWithNoCanvas();
-        rebuildImgWithNoCanvas.writeImgFile();
+        RebuildImgService rebuildImgService = new RebuildImgService();
+        rebuildImgService.writeImgFile();
         System.out.println("Operation completed. Please double check the logs for any errors.");
     }
 

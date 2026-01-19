@@ -1,9 +1,10 @@
-package img.cache;
+package img.io.repository;
 
 import java.nio.file.Path;
 import java.util.Map;
 
-import img.record.Version;
+import img.io.deserialize.JsonFileToObject;
+import img.model.common.Version;
 
 public class KeyFileRepository<T> extends JsonFileToObject<T> {
 

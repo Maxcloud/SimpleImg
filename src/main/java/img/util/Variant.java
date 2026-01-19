@@ -1,4 +1,4 @@
-package img;
+package img.util;
 
 public enum Variant {
     VT_EMPTY,

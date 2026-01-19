@@ -1,6 +1,6 @@
-package img.io;
+package img.io.impl;
 
-import img.cryptography.WzCryptography;
+import img.crypto.WzCryptography;
 import img.util.StringWriter;
 
 import java.nio.file.Path;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
  * Custom input stream for reading encoded strings and numbers from a binary file format.
  * Extends {@link RecyclableSeekableStream} to add decryption logic using {@link WzCryptography}.
  */
-public class ImgSeekableInputStream extends RecyclableSeekableStream {
+public class ImgReadableInputStream extends RecyclableSeekableStream {
     private final StringWriter stringWriter = new StringWriter();
 
     private final Path name;
@@ -21,7 +21,7 @@ public class ImgSeekableInputStream extends RecyclableSeekableStream {
      *
      * @param path the path to the binary file
      */
-    public ImgSeekableInputStream(Path name, Path path, byte[] secret) {
+    public ImgReadableInputStream(Path name, Path path, byte[] secret) {
         super(path, secret);
         this.name = name;
         this.secret = secret;

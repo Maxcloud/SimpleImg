@@ -1,11 +1,12 @@
-package img.cache;
+package img.io.repository;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import img.record.WzImgCache;
+import img.io.deserialize.JsonFileToObject;
+import img.model.common.WzImgCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,7 @@ public class JsonFileRepository<T> extends JsonFileToObject<T> {
 
     public void toUOL(long offset, String uol) { this.uolToString.put(offset, uol); }
 
-    public void saveToFile() {
+    public void saveAsJson() {
         Path outputPath = getPath().resolveSibling(getPath().getFileName() + ".json");
         WzImgCache cache = new WzImgCache(this.stringToOffset, this.offsetToString, this.uolToString);
 
@@ -44,14 +45,14 @@ public class JsonFileRepository<T> extends JsonFileToObject<T> {
         }
     }
 
-    /*public WzImgCache loadFromFile() {
+    public WzImgCache OnLoadJsonAsObj() {
         try (FileReader reader = new FileReader(getPath().toFile() + ".json");
              BufferedReader bufferedReader = new BufferedReader(reader)) {
 
-            return gson.fromJson(bufferedReader, WzImgCache.class);
+            return createDefaultGson().fromJson(bufferedReader, WzImgCache.class);
         } catch (IOException io) {
-            // log.error("An error occurred when saving the file.", io);
+            log.error("An error occurred when saving the file.", io);
             return new WzImgCache(null, null, null);
         }
-    }*/
+    }
 }

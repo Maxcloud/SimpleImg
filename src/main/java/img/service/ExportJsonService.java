@@ -1,27 +1,26 @@
-package img;
+package img.service;
 
-import img.cache.DirectoryConfiguration;
-import img.cache.JsonFileToObject;
-import img.cache.KeyFileRepository;
-import img.cryptography.WzCryptography;
-import img.model.WzImage;
-import img.record.Version;
+import img.configuration.DirectoryConfiguration;
+import img.io.deserialize.JsonFileToObject;
+import img.io.repository.KeyFileRepository;
+import img.crypto.WzCryptography;
+import img.model.image.WzImage;
+import img.model.common.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.concurrent.Executors;
 
 /**
  * SimpleImg is a utility class that traverses a directory structure,
  * parsing WzImage files and dumping their string data to JSON format.
  *
  */
-public class SimpleImg {
+public class ExportJsonService {
 
-    Logger log = LoggerFactory.getLogger(SimpleImg.class);
+    Logger log = LoggerFactory.getLogger(ExportJsonService.class);
 
     private static final Path configFile = Path.of("src/main/resources/configuration.json");
 
@@ -40,8 +39,8 @@ public class SimpleImg {
         byte[] secret = cryptography.getSecret();
 
         System.out.println("Starting to dump strings to JSON. Please wait...");
-        SimpleImg simpleImg = new SimpleImg();
-        simpleImg.dumpStringsToJson(outputDirectory, secret);
+        ExportJsonService exportJsonService = new ExportJsonService();
+        exportJsonService.dumpStringsToJson(outputDirectory, secret);
         System.out.println("Dumping strings to JSON completed. Please double check the logs for any errors.");
     }
 
@@ -55,8 +54,8 @@ public class SimpleImg {
                             return FileVisitResult.CONTINUE;
                         }
 
-                               WzImage wzImage = new WzImage(secret);
-                               wzImage.parse(file);
+                        WzImage wzImage = new WzImage(secret);
+                        wzImage.parse(file);
 
                         return FileVisitResult.CONTINUE;
                     }

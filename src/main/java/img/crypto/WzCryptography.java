@@ -1,7 +1,7 @@
-package img.cryptography;
+package img.crypto;
 
-import img.cache.KeyFileRepository;
-import img.record.Version;
+import img.io.repository.KeyFileRepository;
+import img.model.common.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

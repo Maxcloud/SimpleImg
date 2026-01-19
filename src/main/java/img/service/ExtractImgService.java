@@ -1,10 +1,11 @@
-package wz;
+package img.service;
 
-import img.cache.JsonFileToObject;
-import img.cache.KeyFileRepository;
-import img.cache.DirectoryConfiguration;
-import img.cryptography.WzCryptography;
-import img.record.Version;
+import img.io.deserialize.JsonFileToObject;
+import img.io.repository.KeyFileRepository;
+import img.configuration.DirectoryConfiguration;
+import img.crypto.WzCryptography;
+import img.model.common.Version;
+import wz.WzFile;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -20,7 +21,7 @@ import java.util.stream.Stream;
  * folder structure.
  *
  */
-public class ExtractImg {
+public class ExtractImgService {
 
     private static final Path configFile = Path.of("src/main/resources/configuration.json");
 

@@ -1,4 +1,4 @@
-package img.io;
+package img.io.impl;
 
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
