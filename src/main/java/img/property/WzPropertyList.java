@@ -1,8 +1,8 @@
 package img.property;
 
-import img.Variant;
-import img.io.ImgSeekableInputStream;
-import img.io.ImgWritableOutputStream;
+import img.util.Variant;
+import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgWritableOutputStream;
 import img.util.StringWriter;
 
 import java.util.LinkedHashMap;
@@ -14,7 +14,7 @@ public class WzPropertyList implements WzProperty {
     private final Map<String, WzProperty> lWzProperty = new LinkedHashMap<>();
 
     @Override
-    public void read(ImgSeekableInputStream stream) {
+    public void read(ImgReadableInputStream stream) {
         stream.readByte();
         stream.readByte();
         int children = stream.decodeInt();
@@ -27,8 +27,12 @@ public class WzPropertyList implements WzProperty {
         return name;
     }
 
+    public Map<String, WzProperty> getProperties() {
+        return lWzProperty;
+    }
+
     @Override
-    public void parse(ImgSeekableInputStream stream) {
+    public void parse(ImgReadableInputStream stream) {
         String property_name = stream.getStringWriter().internalDeserializeString(stream);
         byte variant = stream.readByte();
 
@@ -45,7 +49,10 @@ public class WzPropertyList implements WzProperty {
                 prop.getName().equals("Sound_DX8")) {
                 return;
             }
+
+            if (prop.getProperties().isEmpty()) return;
         }
+
 
         lWzProperty.put(property_name, property);
     }

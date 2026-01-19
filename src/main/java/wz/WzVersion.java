@@ -1,8 +1,8 @@
 package wz;
 
-import img.cache.JsonFileToObject;
-import img.cache.DirectoryConfiguration;
-import img.io.RecyclableSeekableStream;
+import img.io.deserialize.JsonFileToObject;
+import img.configuration.DirectoryConfiguration;
+import img.io.impl.RecyclableSeekableStream;
 
 import java.nio.file.Path;
 

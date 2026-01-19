@@ -1,7 +1,7 @@
 package img.property;
 
-import img.io.ImgSeekableInputStream;
-import img.io.ImgWritableOutputStream;
+import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgWritableOutputStream;
 import img.util.StringWriter;
 
 import java.util.LinkedHashMap;
@@ -14,8 +14,12 @@ public class WzDispatchProperty implements WzProperty {
 
     public WzDispatchProperty() { }
 
+    public Map<String, WzProperty> getProperties() {
+        return lWzProperty;
+    }
+
     @Override
-    public void read(ImgSeekableInputStream stream) {
+    public void read(ImgReadableInputStream stream) {
         long endOfBytes = stream.readInt() + stream.getPosition();
 
         String name = stream.getStringWriter().internalDeserializeString(stream);

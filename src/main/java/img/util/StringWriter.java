@@ -1,7 +1,7 @@
 package img.util;
 
-import img.io.ImgSeekableInputStream;
-import img.io.ImgWritableOutputStream;
+import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgWritableOutputStream;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +11,7 @@ public class StringWriter {
     public final Map<Long, String> fromArchive = new HashMap<>();
     public final Map<String, Long> toArchive = new HashMap<>();
 
-    public String internalDeserializeString(ImgSeekableInputStream stream) {
+    public String internalDeserializeString(ImgReadableInputStream stream) {
         String result = null;
 
         byte type = stream.readByte();

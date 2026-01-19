@@ -1,8 +1,7 @@
 package img;
 
-import img.io.RecyclableSeekableStream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import img.io.impl.RecyclableSeekableStream;
+import img.util.Variant;
 
 import java.awt.*;
 import java.util.Map;
@@ -114,10 +113,10 @@ public record WzValueReader(RecyclableSeekableStream stream, WzPathNavigator dir
      * @return The string value, or null if an error occurs.
      */
     public String readString(String attr) {
-        Map<String, Long> strings = directory().getStrings();
+        Map<String, Long> strings = directory().getOffsets();
         Objects.requireNonNull(strings, "There is no string cache for this img file.");
 
-        Map<Long, String> offsets = directory().getOffsets();
+        Map<Long, String> offsets = directory().getStrings();
         Objects.requireNonNull(offsets, "There is no offset cache for this img file.");
 
         long offset = directory().getOffset(attr);

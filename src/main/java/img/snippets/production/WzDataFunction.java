@@ -1,7 +1,7 @@
 package img.snippets.production;
 
 import img.WzPathNavigator;
-import img.io.RecyclableSeekableStream;
+import img.io.impl.RecyclableSeekableStream;
 
 @FunctionalInterface
 public interface WzDataFunction<T> {

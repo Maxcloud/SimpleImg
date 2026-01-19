@@ -1,9 +1,9 @@
 package img;
 
-import img.cache.DirectoryConfiguration;
-import img.io.ImgSeekableInputStream;
-import img.io.ImgWritableOutputStream;
-import img.model.WzImgFile;
+import img.configuration.DirectoryConfiguration;
+import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgWritableOutputStream;
+import img.model.common.WzImgFile;
 import img.util.StringWriter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -41,11 +41,10 @@ public class WzImgFileWriter {
         Path outputFilePath = outputRoot.resolve(inputFilePath);
 
         Files.createDirectories(outputFilePath.getParent());
-
         Path outputFileName = outputFilePath.getFileName();
 
         WzImgFile archive = new WzImgFile();
-        try (ImgSeekableInputStream stream = new ImgSeekableInputStream(outputFileName, inputFileName, secret)) {
+        try (ImgReadableInputStream stream = new ImgReadableInputStream(outputFileName, inputFileName, secret)) {
             archive.parse(stream);
         } catch (Exception e) {
             log.error("An error occurred when parsing {}.", inputFileName.getFileName(), e);

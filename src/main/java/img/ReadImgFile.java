@@ -1,9 +1,9 @@
 package img;
 
-import img.cache.JsonFileRepository;
-import img.cryptography.WzCryptography;
-import img.record.WzImgCache;
-import img.io.RecyclableSeekableStream;
+import img.io.repository.JsonFileRepository;
+import img.crypto.WzCryptography;
+import img.model.common.WzImgCache;
+import img.io.impl.RecyclableSeekableStream;
 import img.snippets.production.WzImplDataRequest;
 import img.snippets.production.WzDataConsumer;
 import img.snippets.production.WzDataFunction;

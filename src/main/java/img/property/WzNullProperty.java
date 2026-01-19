@@ -1,7 +1,7 @@
 package img.property;
 
-import img.io.ImgSeekableInputStream;
-import img.io.ImgWritableOutputStream;
+import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgWritableOutputStream;
 import img.util.StringWriter;
 
 public class WzNullProperty implements WzProperty {
@@ -9,7 +9,7 @@ public class WzNullProperty implements WzProperty {
     WzNullProperty() { }
 
     @Override
-    public void read(ImgSeekableInputStream stream) { }
+    public void read(ImgReadableInputStream stream) { }
 
     @Override
     public void write(StringWriter stringWriterPool, String key,

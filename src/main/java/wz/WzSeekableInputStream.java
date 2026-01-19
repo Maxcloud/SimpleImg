@@ -1,10 +1,10 @@
 package wz;
 
-import img.io.ImgSeekableInputStream;
+import img.io.impl.ImgReadableInputStream;
 
 import java.nio.file.Path;
 
-public class WzSeekableInputStream extends ImgSeekableInputStream {
+public class WzSeekableInputStream extends ImgReadableInputStream {
 
     private final int fileStart;
 

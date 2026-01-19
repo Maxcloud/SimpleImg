@@ -1,7 +1,7 @@
 package img.property;
 
-import img.io.ImgSeekableInputStream;
-import img.io.ImgWritableOutputStream;
+import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgWritableOutputStream;
 import img.util.StringWriter;
 
 public class WzVectorProperty implements WzProperty {
@@ -10,7 +10,7 @@ public class WzVectorProperty implements WzProperty {
     private int y;
 
     @Override
-    public void read(ImgSeekableInputStream stream) {
+    public void read(ImgReadableInputStream stream) {
         this.x = stream.decodeInt();
         this.y = stream.decodeInt();
     }

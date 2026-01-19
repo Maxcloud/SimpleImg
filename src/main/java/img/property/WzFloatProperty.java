@@ -1,7 +1,7 @@
 package img.property;
 
-import img.io.ImgSeekableInputStream;
-import img.io.ImgWritableOutputStream;
+import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgWritableOutputStream;
 import img.util.StringWriter;
 
 public class WzFloatProperty implements WzProperty {
@@ -12,7 +12,7 @@ public class WzFloatProperty implements WzProperty {
     WzFloatProperty() { }
 
     @Override
-    public void read(ImgSeekableInputStream stream) {
+    public void read(ImgReadableInputStream stream) {
         this.data = stream.decodeFloat();
     }
 

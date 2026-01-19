@@ -34,8 +34,8 @@ public static void main(String[] args) {
     String wzFilePath = System.getProperty("wz.path");
     Path root = Path.of(wzFilePath);
 
-    SimpleImg simpleImg = new SimpleImg();
-    simpleImg.dumpStringsToJson(root);
+    SimpleImg exportJsonService = new SimpleImg();
+    exportJsonService.dumpStringsToJson(root);
 }
 ```
 

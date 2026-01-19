@@ -1,6 +1,6 @@
 package img;
 
-import img.record.WzImgCache;
+import img.model.common.WzImgCache;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,40 +9,40 @@ import java.util.Map;
 public class WzPathNavigator {
 
     private final String context;
-    private final Map<String, Long> strings;
-    private final Map<Long, String> offsets;
+    private final Map<String, Long> offsets;
+    private final Map<Long, String> strings;
     // private final Map<Long, String> uolStrings;
 
     public String getContext() {
         return context;
     }
 
-    public Map<String, Long> getStrings() {
-        return strings;
+    public Map<String, Long> getOffsets() {
+        return offsets;
     }
 
-    public Map<Long, String> getOffsets() {
-        return offsets;
+    public Map<Long, String> getStrings() {
+        return strings;
     }
 
     public WzPathNavigator() {
         this.context = "";
-        this.strings = Collections.emptyMap();
         this.offsets = Collections.emptyMap();
+        this.strings = Collections.emptyMap();
         // this.uolStrings = Collections.emptyMap();
     }
 
     public WzPathNavigator(String context, WzImgCache data) {
         this.context = context;
-        this.strings = data.stringCache();
         this.offsets = data.offsetCache();
+        this.strings = data.stringCache();
         // this.uolStrings = data.uolCache();
     }
 
-    private WzPathNavigator(String context, Map<String, Long> strings, Map<Long, String> offsets/*, Map<Long, String> uolStrings*/) {
+    private WzPathNavigator(String context, Map<String, Long> offsets, Map<Long, String> strings/*, Map<Long, String> uolStrings*/) {
         this.context = context;
-        this.strings = strings;
         this.offsets = offsets;
+        this.strings = strings;
         // this.uolStrings = uolStrings;
     }
 
@@ -53,21 +53,21 @@ public class WzPathNavigator {
 
     public WzPathNavigator resolve(String relativePath) {
         String newContext = context.isEmpty() ? relativePath : context + "/" + relativePath;
-        if (!strings.containsKey(newContext)) {
+        if (!offsets.containsKey(newContext)) {
             // only log when in debug mode
             // log.debug("Path not found: {}", newContext);
             return new WzPathNavigator(); // silent fail
         }
-        return new WzPathNavigator(newContext, strings, offsets);
+        return new WzPathNavigator(newContext, offsets, strings);
     }
 
     public List<String> getChildren() {
-        if (getStrings().isEmpty()) {
+        if (getOffsets().isEmpty()) {
             return Collections.emptyList();
         }
 
         String prefix = context.isEmpty() ? "" : (this.context + "/");
-        return getStrings().keySet().stream()
+        return getOffsets().keySet().stream()
                 .filter(key -> key.startsWith(prefix))
                 .map(key -> key.substring(prefix.length()))
                 .filter(this::isValidChildKey)
@@ -79,11 +79,11 @@ public class WzPathNavigator {
     }
 
     public long getOffset(String attribute) {
-        return getStrings().getOrDefault(this.context + "/" + attribute, -1L);
+        return getOffsets().getOrDefault(this.context + "/" + attribute, -1L);
     }
 
     public String getString(long offset) {
-        return getOffsets().getOrDefault(offset, "");
+        return getStrings().getOrDefault(offset, "");
     }
 
     /*public String getUolString(long offset) {
