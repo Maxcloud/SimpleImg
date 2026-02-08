@@ -1,24 +1,30 @@
 package app;
 
+import img.ImgFileCache;
 import img.WzPathNavigator;
 import img.io.repository.JsonFileRepository;
-import img.model.common.WzImgCache;
+import img.model.common.FileImgRecord;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class FileHelp {
 
-    private final TmpFileCache oTmpFileCache;
+    private final ImgFileCache oImgFileCache;
     private final JTree oDefaultTree;
 
-    public FileHelp(TmpFileCache oTmpFileCache, JTree oDefaultTree) {
-        this.oTmpFileCache = oTmpFileCache;
+    public FileHelp(ImgFileCache oImgFileCache, JTree oDefaultTree) {
+        this.oImgFileCache = oImgFileCache;
         this.oDefaultTree = oDefaultTree;
     }
 
@@ -42,7 +48,7 @@ public class FileHelp {
      * @return True if the file is already loaded, false otherwise.
      */
     private boolean isFileAlreadyLoaded(Path oPath) {
-        return oTmpFileCache.getPathToImgCache().containsKey(oPath);
+        return oImgFileCache.getImgCache().containsKey(oPath);
     }
 
     /**
@@ -59,6 +65,24 @@ public class FileHelp {
                 sMessage,
                 sTitle,
                 JOptionPane.WARNING_MESSAGE);
+    }
+
+    public void OnLoadMultipleFromJson(Path oPath) {
+        File oFile = oPath.toFile();
+        File[] aFiles = oFile.listFiles();
+        Objects.requireNonNull(aFiles, "No files found in the directory.");
+
+        Stream<File> oStream = Arrays.stream(aFiles);
+        Stream<Path> oMapToPath = oStream.map(File::toPath);
+        Predicate<Path> isImgFile = oPathFile -> oPathFile
+                .getFileName()
+                .toString()
+                .endsWith(".img");
+
+        List<Path> pp = oMapToPath.filter(isImgFile).toList();
+        for (Path oFilePath : pp) {
+            OnLoadFromJson(oFilePath);
+        }
     }
 
     /**
@@ -82,12 +106,13 @@ public class FileHelp {
             return;
         }
 
-        JsonFileRepository<WzImgCache> repository =
-                new JsonFileRepository<>(oPath, WzImgCache.class);
+        JsonFileRepository<FileImgRecord> repository =
+                new JsonFileRepository<>(oPath, FileImgRecord.class);
 
-        WzImgCache oWzImgCache = repository.OnLoadJsonAsObj();
-        oTmpFileCache.addImgCache(oPath, oWzImgCache);
-        AddImgToTree(oPath, oWzImgCache);
+        FileImgRecord oFileImgRecord = repository.loadFromJson();
+        oImgFileCache.insertFileImgRecord(oPath, oFileImgRecord);
+
+        AddImgToTree(oPath, oFileImgRecord);
     }
 
     /**
@@ -96,19 +121,19 @@ public class FileHelp {
      * @param oPath  The path of the image file.
      * @param oImgCache The WzImgCache object representing the image data.
      */
-    private void AddImgToTree(Path oPath, WzImgCache oImgCache) {
+    private void AddImgToTree(Path oPath, FileImgRecord oImgCache) {
 
         DefaultTreeModel oDefaultTreeModel = (DefaultTreeModel) oDefaultTree.getModel();
-        DefaultMutableTreeNode oRoot = (DefaultMutableTreeNode) oDefaultTreeModel.getRoot();
+        DefaultMutableTreeNode oParent = (DefaultMutableTreeNode) oDefaultTreeModel.getRoot();
 
-        TreePath oTreePath = new TreePath(oRoot.getPath());
+        TreePath oTreePath = new TreePath(oParent.getPath());
         WzPathNavigator oWzPathNav = new WzPathNavigator("", oImgCache);
 
-        DefaultMutableTreeNode oDefaultTreeNode =
+        DefaultMutableTreeNode oNewChild =
                 new DefaultMutableTreeNode(oPath.getFileName());
 
-        oDefaultTreeModel.insertNodeInto(oDefaultTreeNode, oRoot, oRoot.getChildCount());
-        ParseImgFile(oWzPathNav, oDefaultTreeNode);
+        oDefaultTreeModel.insertNodeInto(oNewChild, oParent, oParent.getChildCount());
+        ParseImgFile(oWzPathNav, oNewChild);
 
         oDefaultTree.expandPath(oTreePath);
     }

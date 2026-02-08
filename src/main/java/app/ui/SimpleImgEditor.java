@@ -1,12 +1,16 @@
+package app.ui;
+
 import app.AppMenu;
 import app.FileHelp;
-import app.TmpFileCache;
+import app.MyTreeSelectionListener;
+import img.ImgFileCache;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
+import java.nio.file.Path;
 
 public class SimpleImgEditor extends JFrame {
 
@@ -18,22 +22,29 @@ public class SimpleImgEditor extends JFrame {
     private JTree oDefaultTree;
     private JScrollPane oScrollPane;
 
-    public SimpleImgEditor() {
+    private final FileHelp oFileHelp;
+    private final String sCurrentDirectory;
+
+    public SimpleImgEditor(String sCurrentDirectory) {
+        this.sCurrentDirectory = sCurrentDirectory;
+
+        ImgFileCache oImgFileCache = new ImgFileCache();
+        oFileHelp = new FileHelp(
+                oImgFileCache, oDefaultTree);
+
         setContentPane(oMainPanel);
         setTitle("Simple Image Editor");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setAppMenu();
+        setJMenuBar(new AppMenu(oFileHelp));
+        setLocationRelativeTo(null);
         setVisible(true);
         setDefaultTree(oDefaultTree);
+        OnLoadDirectory(Path.of(sCurrentDirectory));
     }
 
-    private void setAppMenu() {
-        TmpFileCache oTmpFileCache = new TmpFileCache();
-        FileHelp oFileHelp = new FileHelp(
-                oTmpFileCache, oDefaultTree);
-
-        setJMenuBar(new AppMenu(oFileHelp));
+    private void OnLoadDirectory(Path oPath) {
+        oFileHelp.OnLoadMultipleFromJson(oPath);
     }
 
     private void setDefaultTree(JTree oDefaultTree) {
@@ -41,26 +52,16 @@ public class SimpleImgEditor extends JFrame {
         DefaultTreeModel oDefaultTreeModel  = new DefaultTreeModel(oRoot);
         TreePath oDefaultTreePath           = new TreePath(oRoot.getPath());
 
+        MyTreeSelectionListener oMyTreeSelectionListener =
+                new MyTreeSelectionListener();
+
         oDefaultTree.setModel(oDefaultTreeModel);
         oDefaultTree.setRootVisible(false);
         oDefaultTree.getSelectionModel().setSelectionMode(
                 TreeSelectionModel.SINGLE_TREE_SELECTION);
         oDefaultTree.addTreeSelectionListener(
-                new MyTreeSelectionListener());
+                oMyTreeSelectionListener);
         oDefaultTree.expandPath(oDefaultTreePath);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                UIManager.setLookAndFeel(
-                        UIManager.getSystemLookAndFeelClassName());
-            } catch (UnsupportedLookAndFeelException | ClassNotFoundException |
-                     InstantiationException | IllegalAccessException e) {
-                System.out.println(e.getMessage());
-            }
-            new SimpleImgEditor();
-        });
     }
 
 }
