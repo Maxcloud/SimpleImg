@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="app.ui.ChooseDirectory">
+  <grid id="27dc6" binding="panel1" default-binding="true" layout-manager="GridBagLayout">
+    <constraints>
+      <xy x="20" y="20" width="432" height="117"/>
+    </constraints>
+    <properties>
+      <doubleBuffered value="true"/>
+      <enabled value="true"/>
+      <inheritsPopupMenu value="false"/>
+      <opaque value="true"/>
+    </properties>
+    <border type="empty">
+      <size top="5" left="5" bottom="5" right="5"/>
+    </border>
+    <children>
+      <component id="b65b0" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag top="5" left="5" bottom="5" right="5" weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <text value="Path"/>
+        </properties>
+      </component>
+      <component id="3351d" class="javax.swing.JButton" binding="oInitializeButton">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag top="2" left="2" bottom="2" right="2" weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <maximumSize width="93" height="24"/>
+          <minimumSize width="93" height="24"/>
+          <preferredSize width="93" height="24"/>
+          <text value="Initialize"/>
+        </properties>
+      </component>
+      <component id="89f0" class="javax.swing.JButton" binding="oBrowseButton">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <gridbag top="2" left="2" bottom="2" right="2" weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <maximumSize width="93" height="24"/>
+          <minimumSize width="93" height="24"/>
+          <preferredSize width="93" height="24"/>
+          <text value="Browse..."/>
+        </properties>
+      </component>
+      <component id="d1653" class="javax.swing.JComboBox" binding="oComboBox">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag top="2" left="2" bottom="2" right="2" weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <doubleBuffered value="true"/>
+          <enabled value="true"/>
+          <minimumSize width="283" height="22"/>
+          <model/>
+          <preferredSize width="283" height="22"/>
+        </properties>
+      </component>
+      <component id="9598f" class="javax.swing.JButton" binding="extractImgButton" default-binding="true">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="0.0" weighty="0.0"/>
+        </constraints>
+        <properties>
+          <maximumSize width="93" height="24"/>
+          <minimumSize width="93" height="24"/>
+          <preferredSize width="93" height="24"/>
+          <text value="Extract Img"/>
+        </properties>
+      </component>
+    </children>
+  </grid>
+</form>
