@@ -4,16 +4,19 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class OpenFileAction extends AbstractAction {
 
-    private final String sPreviousOpenedDirectory;;
+    private final String sPreviousOpenedDirectory;
     private final Consumer<Path> oConsumePath;
 
     public OpenFileAction(Consumer<Path> oConsumePath) {
         this.oConsumePath = oConsumePath;
-        sPreviousOpenedDirectory = SimpleImgApplication.getLastOpenedDirectory();
+        sPreviousOpenedDirectory = Application.OnGetLastBrowseDirectory();
     }
 
     @Override
@@ -29,10 +32,22 @@ public class OpenFileAction extends AbstractAction {
         if (nReturnValue == JFileChooser.APPROVE_OPTION) {
 
             File oSelectedFile = oFileSelect.getSelectedFile();
-            SimpleImgApplication.saveLastOpenedDirectory(oSelectedFile.getParent());
+            Path oFilePathSelected = oSelectedFile.toPath();
+            String sFilePathSelected = oFilePathSelected.toString();
 
-            Path oSelectedPath = oFileSelect.getSelectedFile().toPath();
-            oConsumePath.accept(oSelectedPath);
+            Application.OnSaveLastBrowseDirectory(sFilePathSelected);
+            Objects.requireNonNull(sPreviousOpenedDirectory, "Directory not found.");
+
+            Pattern pattern = Pattern.compile("[^\\\\]+\\.wz");
+            Matcher matcher = pattern.matcher(sPreviousOpenedDirectory);
+            if (matcher.find()) {
+                String directory = matcher.group();
+                String capitalized = directory.substring(0, 1).toUpperCase() +
+                        directory.substring(1);
+                // System.out.println(capitalized);
+                // return capitalized folder name
+            }
+            oConsumePath.accept(oFilePathSelected);
         }
     }
 }

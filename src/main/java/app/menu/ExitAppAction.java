@@ -11,6 +11,6 @@ public class ExitAppAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        System.exit(0);
     }
 }

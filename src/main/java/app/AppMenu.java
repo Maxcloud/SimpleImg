@@ -2,6 +2,7 @@ package app;
 
 import app.menu.ExitAppAction;
 import app.menu.OpenFileAction;
+import app.menu.OpenFolderAction;
 import app.menu.SaveFileAction;
 
 import javax.swing.*;
@@ -24,13 +25,18 @@ public class AppMenu extends JMenuBar {
         add(oFileMenu);
         add(oHelpMenu);
 
-        JMenuItem oOpenItem = new JMenuItem("Open");
-        JMenuItem oSaveItem = new JMenuItem("Save");
-        JMenuItem oExitItem = new JMenuItem("Exit");
+        // var oOpenFileItem = new JMenuItem("Open File");
+        // var oOpenFolderItem = new JMenuItem("Open Folder");
+        var oSaveItem = new JMenuItem("Save");
+        var oExitItem = new JMenuItem("Exit");
 
-        oOpenItem.addActionListener(new OpenFileAction(
+        /*oOpenFileItem.addActionListener(new OpenFileAction(
                 oFileHelp::OnLoadFromJson
-        ));
+        ));*/
+
+        /*oOpenFolderItem.addActionListener(new OpenFolderAction(
+                oFileHelp::OnLoadMultipleFromJson
+        ));*/
 
         var oSaveFileAction = new SaveFileAction();
         oSaveItem.addActionListener(oSaveFileAction);
@@ -38,7 +44,9 @@ public class AppMenu extends JMenuBar {
         var oExitAppAction = new ExitAppAction();
         oExitItem.addActionListener(oExitAppAction);
 
-        oFileMenu.add(oOpenItem);
+        // oFileMenu.add(oOpenFileItem);
+        // oFileMenu.add(oOpenFolderItem);
+        oFileMenu.add(SEPARATOR);
         oFileMenu.add(oSaveItem);
         oFileMenu.add(oExitItem);
     }
