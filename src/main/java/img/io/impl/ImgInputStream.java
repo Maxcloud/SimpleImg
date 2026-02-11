@@ -114,8 +114,6 @@ public class ImgInputStream extends ImgRecyclableSeekableStream {
 
         Objects.requireNonNull(result, "Be sure to provide a valid string decoding implementation.");
         return result;
-
-
     }
 }
 
