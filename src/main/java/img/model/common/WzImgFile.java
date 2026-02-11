@@ -1,33 +1,29 @@
 package img.model.common;
 
+import img.crypto.WzStringCodec;
+import img.io.impl.ImgInputStream;
 import wz.WzNode;
-import img.io.impl.ImgReadableInputStream;
 import img.io.impl.ImgWritableOutputStream;
 import img.property.WzPropertyList;
-import img.util.StringWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class WzImgFile {
 
-    Logger log = LoggerFactory.getLogger(WzImgFile.class);
-
     private WzPropertyList property;
+    private final WzStringCodec codec;
 
-    public WzImgFile() { }
-
-    public void parse(ImgReadableInputStream stream) {
-        stream.getStringWriter().internalDeserializeString(stream);
-        this.property = new WzPropertyList();
-        this.property.read(stream);
+    public WzImgFile(WzStringCodec codec) {
+        this.codec = codec;
     }
 
-    public void write(StringWriter stringWriterPool, String key, ImgWritableOutputStream stream) {
-        /*if (property.getProperties().isEmpty()) {
-            System.out.printf("%s has no properties to write. Skipping...\r\n", key);
-            return;
-        }*/
-        stringWriterPool.internalSerializeString(stream, key, WzNode.NEW_ARCHIVE, WzNode.ALREADY_EXISTS);
-        property.write(stringWriterPool, key, stream);
+    public void parse(ImgInputStream stream) {
+        this.codec.deserialize(stream);
+
+        this.property = new WzPropertyList();
+        this.property.read(codec, stream);
+    }
+
+    public void write(String key, ImgWritableOutputStream stream) {
+        codec.serialize(stream, key, WzNode.NEW_ARCHIVE, WzNode.EXIST_ARCHIVE);
+        property.write(codec, key, stream);
     }
 }

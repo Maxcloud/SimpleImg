@@ -1,17 +1,18 @@
 package img.service;
 
-import img.configuration.DirectoryConfiguration;
-import img.io.deserialize.JsonFileToObject;
-import img.io.repository.KeyFileRepository;
-import img.crypto.WzCryptography;
+import img.ListWzFile;
+import img.WzConfiguration;
+import img.crypto.WzStringHandler;
+import img.io.repository.JsonFileRepository;
+import img.model.common.WzImgCache;
 import img.model.image.WzImage;
-import img.model.common.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 /**
  * SimpleImg is a utility class that traverses a directory structure,
@@ -26,45 +27,52 @@ public class ExportJsonService {
 
     public static void main(String[] args) {
 
-        JsonFileToObject<DirectoryConfiguration> fileToObject =
-                new JsonFileToObject<>(configFile, DirectoryConfiguration.class);
-        DirectoryConfiguration directoryConfiguration = fileToObject.createObjFromFile();
+        WzConfiguration configuration = new WzConfiguration(configFile);
 
-        Path outputDirectory = Path.of(directoryConfiguration.getOutput());
+        Path outputDirectory = Path.of(configuration.getOutput());
 
-        KeyFileRepository<Version> repository = new KeyFileRepository<>(Version.class);
-        repository.setSecret(directoryConfiguration.getVersion());
-
-        WzCryptography cryptography = new WzCryptography(repository);
-        byte[] secret = cryptography.getSecret();
+        int version = configuration.getVersion();
+        byte[] secret = configuration.getSecret();
 
         System.out.println("Starting to dump strings to JSON. Please wait...");
         ExportJsonService exportJsonService = new ExportJsonService();
-        exportJsonService.dumpStringsToJson(outputDirectory, secret);
+        exportJsonService.dumpStringsToJson(outputDirectory, version, secret);
         System.out.println("Dumping strings to JSON completed. Please double check the logs for any errors.");
     }
 
-    public void dumpStringsToJson(Path root, byte[] secret) {
-            try {
-                Files.walkFileTree(root, new SimpleFileVisitor<>() {
+    public void dumpStringsToJson(Path root, int version, byte[] secret) {
+        WzImage wzImage = new WzImage(version, secret);
 
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-                        if (file.toString().endsWith(".json")) {
-                            return FileVisitResult.CONTINUE;
-                        }
+        ListWzFile listWzFile = new ListWzFile(Path.of("E:\\MapleStory_83\\Maplestory\\List.wz"));
+        List<String> listWzFileNames = listWzFile.getEntries();
 
-                        WzImage wzImage = new WzImage(secret);
-                        wzImage.parse(file);
+        WzStringHandler handle = new WzStringHandler(version, secret);
+        handle.setModernImgFiles(listWzFileNames);
 
+        try {
+            Files.walkFileTree(root, new SimpleFileVisitor<>() {
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    if (file.toString().endsWith(".json")) {
                         return FileVisitResult.CONTINUE;
                     }
+                    wzImage.parse(file);
+                    return FileVisitResult.CONTINUE;
+                }
 
-                });
-            } catch (IOException e) {
-                log.error("An error has occurred while walking the file tree.", e);
-            }
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                    log.error("Failed to visit file: {}", file, exc);
+                    return FileVisitResult.CONTINUE;
+                }
+
+            });
+
+        } catch (IOException e) {
+            log.error("An error has occurred while walking the file tree.", e);
         }
+    }
 }
 
 

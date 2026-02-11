@@ -2,11 +2,16 @@ package img.configuration;
 
 public class DirectoryConfiguration {
 
+    private int version_;
     private String version;
     private String input;
     private String output;
     private String newOutput;
     private boolean mergeFolders;
+
+    public int getVersion_() {
+        return version_;
+    }
 
     public String getVersion() {
         return version;

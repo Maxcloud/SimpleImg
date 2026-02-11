@@ -1,20 +1,20 @@
 package img.service;
 
+import img.WzConfiguration;
 import img.io.deserialize.JsonFileToObject;
 import img.io.repository.KeyFileRepository;
 import img.configuration.DirectoryConfiguration;
 import img.crypto.WzCryptography;
 import img.model.common.Version;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wz.WzFile;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Extracts img files from .wz files and merges them into a single,
@@ -22,6 +22,8 @@ import java.util.stream.Stream;
  *
  */
 public class ExtractImgService {
+
+    private final Logger log = LoggerFactory.getLogger(ExtractImgService.class);
 
     private static final Path configFile = Path.of("src/main/resources/configuration.json");
 
@@ -37,46 +39,64 @@ public class ExtractImgService {
         "Sound"
     );
 
+    private static Path outputDirectory;
+    private static int version;
+    private static byte[] secret;
+
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        JsonFileToObject<DirectoryConfiguration> fileToObject =
-                new JsonFileToObject<>(configFile, DirectoryConfiguration.class);
-        DirectoryConfiguration directoryConfiguration = fileToObject.createObjFromFile();
+        WzConfiguration configuration = new WzConfiguration(configFile);
+        DirectoryConfiguration directoryConfiguration = configuration.getDirectories();
 
-        Path inputDirectory = Path.of(directoryConfiguration.getInput());
-        Path outputDirectory = Path.of(directoryConfiguration.getOutput());
+        Path inputDirectory = Path.of(configuration.getInput());
+        outputDirectory = Path.of(configuration.getOutput());
         boolean isMergeMode = directoryConfiguration.isMergeFolders();
 
-        KeyFileRepository<Version> repository = new KeyFileRepository<>(Version.class);
-        repository.setSecret(directoryConfiguration.getVersion());
+        secret = configuration.getSecret();
+        version = configuration.getVersion();
 
-        WzCryptography cryptography = new WzCryptography(repository);
-        byte[] secret = cryptography.getSecret();
-
-        Predicate<Path> isWzFile = file -> file.toString().endsWith(".wz");
-        try (Stream<Path> stream = Files.list(inputDirectory)) {
-            processFile(stream, isWzFile, inputDirectory, outputDirectory, secret);
-        }
+        ExtractImgService service = new ExtractImgService();
+        service.readWzDirectory(inputDirectory);
 
         if (isMergeMode) {
             System.out.println("Extraction Complete. Merging folders now.");
             Thread.sleep(1000);
 
-            MergeFolderContents(outputDirectory);
+            service.MergeFolderContents(outputDirectory);
         } else {
             System.out.println("Extraction Complete.");
         }
     }
 
-    private static void processFile(Stream<Path> stream, Predicate<Path> isWzFile,
-                                    Path input, Path output, byte[] secret) {
-
-        System.out.println(input);
-        Function<Path, WzFile> nextFile = wzFile -> new WzFile(wzFile, output, secret);
-        stream.filter(Files::isRegularFile).filter(isWzFile).forEach(nextFile::apply);
+    public void readWzDirectory(Path oPath) {
+        try (var stream = Files.list(oPath)) {
+            stream.filter(this::fnExcluded).forEach(this::walkFileTree);
+        } catch (Exception e) {
+            log.error("Error reading files: {}", e.getMessage());
+        }
     }
 
-    private static void MergeFolderContents(Path outputPath) throws IOException {
+    private boolean fnExcluded(Path oPath) {
+        String sName = oPath.getFileName().toString();
+        return sName.endsWith(".wz");
+    }
+
+    private void walkFileTree(Path oPath) {
+        boolean isDirectory     = Files.isDirectory(oPath);
+        boolean isRegularFile   = Files.isRegularFile(oPath);
+
+        if (isDirectory) {
+            readWzDirectory(oPath);
+        } else if (isRegularFile) {
+            try {
+                new WzFile(oPath, outputDirectory, version, secret);
+            } catch (Exception e) {
+                log.error("An error occurred when processing {}.", oPath.getFileName(), e);
+            }
+        }
+    }
+
+    private void MergeFolderContents(Path outputPath) throws IOException {
         for (String folderName : BASE_NAMES) {
             Path target = outputPath.resolve(folderName + ".wz");
 
@@ -84,9 +104,10 @@ public class ExtractImgService {
                 Files.createDirectories(target);
             }
 
-            Pattern numberedFolderPattern = Pattern.compile(Pattern.quote(folderName) + "\\d+\\.wz");
+            String quote = Pattern.quote(folderName);
+            Pattern numberedFolderPattern = Pattern.compile(quote + "\\d+\\.wz");
 
-            try (DirectoryStream<Path> stream = Files.newDirectoryStream(outputPath)) {
+            try (var stream = Files.newDirectoryStream(outputPath)) {
                 for (Path entry : stream) {
                     String path = entry.getFileName().toString();
                     if (Files.isDirectory(entry) && numberedFolderPattern.matcher(path).matches()) {
@@ -99,8 +120,10 @@ public class ExtractImgService {
         System.out.println("Successfully merged all files and folders.");
     }
 
-    private static void MoveFolderContents(Path source, Path target) throws IOException {
-        Files.walkFileTree(source, new SimpleFileVisitor<>() {
+    private void MoveFolderContents(Path source, Path target) throws IOException {
+
+        SimpleFileVisitor<Path> visitor = new SimpleFileVisitor<>() {
+
             @Override
             public FileVisitResult visitFile(Path file,
                                              BasicFileAttributes attributes) throws IOException {
@@ -118,7 +141,9 @@ public class ExtractImgService {
                 Files.delete(directory);
                 return FileVisitResult.CONTINUE;
             }
-        });
+        };
+
+        Files.walkFileTree(source, visitor);
     }
 
 }

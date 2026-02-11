@@ -1,17 +1,22 @@
 package img.snippets.example;
 
+import img.ImgFileCache;
 import img.ReadImgFile;
 import img.WzPathNavigator;
 import img.WzValueReader;
-import img.snippets.production.EtcWzDataRequest;
+import img.io.impl.ImgRecyclableSeekableStream;
+import img.snippets.production.EtcDataRequest;
 import img.snippets.production.WzDataFunction;
 
 public class SetItemInfo {
 
-    private static final WzDataFunction<SetItemInfoImg> pfnCommon =
-            (stream, root) -> {
+    public WzDataFunction<SetItemInfoImg> getPfnCommon() {
+        return this::ok;
+    }
+
+    private SetItemInfoImg ok(ImgRecyclableSeekableStream stream, WzPathNavigator root) {
         WzValueReader reader;
-            SetItemInfoImg setItemInfoImg = new SetItemInfoImg();
+        SetItemInfoImg setItemInfoImg = new SetItemInfoImg();
 
         for (String entryId : root.getChildren()) {
 
@@ -57,18 +62,18 @@ public class SetItemInfo {
 
             }
         }
-
         return setItemInfoImg;
-    };
-
-    public WzDataFunction<SetItemInfoImg> getPfnCommon() {
-        return pfnCommon;
     }
 
     public static void main(String[] args) {
-        EtcWzDataRequest imgDataRequest = new EtcWzDataRequest("SetItemInfo.img");
+        SetItemInfo oSetItemInfo = new SetItemInfo();
 
-        ReadImgFile<SetItemInfoImg> readImgFile = new ReadImgFile<>();
-        readImgFile.fromImg(imgDataRequest, pfnCommon);
+        EtcDataRequest imgDataRequest = new EtcDataRequest("SetItemInfo.img");
+
+        ImgFileCache oImgFileCache = new ImgFileCache();
+        ReadImgFile oReadImgFile = new ReadImgFile(oImgFileCache);
+
+        WzDataFunction<SetItemInfoImg> oConsume = oSetItemInfo.getPfnCommon();
+        SetItemInfoImg oSetItemInfoImg = oReadImgFile.apply(imgDataRequest, oConsume);
     }
 }

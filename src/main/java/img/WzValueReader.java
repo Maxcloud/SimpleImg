@@ -1,6 +1,6 @@
 package img;
 
-import img.io.impl.RecyclableSeekableStream;
+import img.io.impl.ImgRecyclableSeekableStream;
 import img.util.Variant;
 
 import java.awt.*;
@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 
-public record WzValueReader(RecyclableSeekableStream stream, WzPathNavigator directory) {
+public record WzValueReader(ImgRecyclableSeekableStream stream, WzPathNavigator directory) {
 
     public short readShort(String property) {
         return readShort(property, (short) 0);

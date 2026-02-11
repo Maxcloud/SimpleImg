@@ -1,20 +1,14 @@
 package img.service;
 
+import img.WzConfiguration;
 import img.WzImgFileWriter;
-import img.configuration.DirectoryConfiguration;
-import img.io.deserialize.JsonFileToObject;
-import img.io.repository.KeyFileRepository;
-import img.crypto.WzCryptography;
-import img.model.common.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.util.stream.Stream;
 
 /**
  * SimpleImgNoCanvas is a utility class that traverses a directory,
@@ -27,54 +21,51 @@ public class RebuildImgService {
 
     private static final Path configFile = Path.of("src/main/resources/configuration.json");
 
-    private static DirectoryConfiguration configuration;
-    private static String outputPath;
-    private static byte[] secret;
+    private final WzConfiguration configuration;
+
     /**
      * Main method to start the re-dumping process of img files without canvas properties.
      *
      * @param args command line arguments
      */
     public static void main(String[] args) {
-
-        JsonFileToObject<DirectoryConfiguration> fileToObject =
-                new JsonFileToObject<>(configFile, DirectoryConfiguration.class);
-        configuration = fileToObject.createObjFromFile();
-        outputPath = configuration.getOutput();
-
-        KeyFileRepository<Version> repository =
-                new KeyFileRepository<>(Version.class);
-        repository.setSecret(configuration.getVersion());
-
-        WzCryptography cryptography = new WzCryptography(repository);
-        secret = cryptography.getSecret();
+        WzConfiguration configuration = new WzConfiguration(configFile);
 
         System.out.println("Starting to re-write img files without canvas properties. Please wait...");
-        RebuildImgService rebuildImgService = new RebuildImgService();
-        rebuildImgService.writeImgFile();
+        var service = new RebuildImgService(configuration);
+        var output = configuration.getOutput();
+
+        service.writeImgFile(output);
         System.out.println("Operation completed. Please double check the logs for any errors.");
     }
 
-    /**
-     * Rewrites img files without canvas properties.
-     *
-     */
-    public void writeImgFile() {
-        try {
-            Files.walkFileTree(Path.of(outputPath), new SimpleFileVisitor<>() {
+    public RebuildImgService(WzConfiguration configuration) {
+        this.configuration = configuration;
+    }
 
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (file.toString().endsWith(".json")) {
-                        return FileVisitResult.CONTINUE;
-                    }
-                    WzImgFileWriter image = new WzImgFileWriter(configuration, secret);
-                    image.parse(file);
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+    private boolean fnExcluded(Path oPath) {
+        String sName = oPath.getFileName().toString();
+        return !sName.endsWith(".json");
+    }
+
+    private void walkFileTree(Path oPath) {
+        if (Files.isDirectory(oPath)) {
+            writeImgFile(oPath);
+        } else if (Files.isRegularFile(oPath)) {
+            try {
+                WzImgFileWriter writeImgFile = new WzImgFileWriter(configuration);
+                writeImgFile.parse(oPath);
+            } catch (Exception e) {
+                log.error("An error occurred when processing {}.", oPath.getFileName(), e);
+            }
+        }
+    }
+
+    public void writeImgFile(Path oPath) {
+        try (Stream<Path> stream = Files.list(oPath)) {
+            stream.filter(this::fnExcluded).forEach(this::walkFileTree);
         } catch (IOException e) {
-            log.error("An error has occurred while walking the file tree.", e);
+            log.error("An error has occurred while listing files in the output directory.", e);
         }
     }
 }

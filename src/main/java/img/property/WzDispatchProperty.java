@@ -1,8 +1,9 @@
 package img.property;
 
-import img.io.impl.ImgReadableInputStream;
+import img.crypto.WzStringCodec;
+import img.io.impl.ImgInputStream;
 import img.io.impl.ImgWritableOutputStream;
-import img.util.StringWriter;
+import io.netty.buffer.ByteBuf;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -19,10 +20,10 @@ public class WzDispatchProperty implements WzProperty {
     }
 
     @Override
-    public void read(ImgReadableInputStream stream) {
+    public void read(WzStringCodec codec, ImgInputStream stream) {
         long endOfBytes = stream.readInt() + stream.getPosition();
 
-        String name = stream.getStringWriter().internalDeserializeString(stream);
+        String name = codec.deserialize(stream);
         setName(name);
 
         WzProperty property = null;
@@ -46,18 +47,14 @@ public class WzDispatchProperty implements WzProperty {
                 break;
         }
         if (property != null) {
-            property.read(stream);
+            property.read(codec, stream);
             lWzProperty.put(name, property);
         }
     }
 
     @Override
-    public void write(StringWriter stringWriterPool, String key, ImgWritableOutputStream stream) {
-        stringWriterPool.internalSerializeString(stream, key, (byte) 0x00, (byte) 0x01);
+    public void write(WzStringCodec codec, String key, ImgWritableOutputStream output) {
 
-        byte VT_DISPATCH = 9;
-        stream.writeByte(VT_DISPATCH);
-        writeDispatch(stringWriterPool, stream);
     }
 
     /**
@@ -65,7 +62,7 @@ public class WzDispatchProperty implements WzProperty {
      *
      * @param stream The ImgWritableOutputStream to write to.
      */
-    private void writeDispatch(StringWriter stringWriterPool, ImgWritableOutputStream stream) {
+    private void writeDispatch(WzStringCodec codec, ImgWritableOutputStream stream) {
         int lengthPosition = stream.getPosition();
         stream.writeInt(0); // we're using a placeholder here, for total length.
 
@@ -73,12 +70,12 @@ public class WzDispatchProperty implements WzProperty {
         if (lWzProperty.isEmpty()) {
 
         } else {
-            stringWriterPool.internalSerializeString(stream, getName(), (byte) 0x73, (byte) 0x1B);
+            codec.serialize(stream, getName(), (byte) 0x73, (byte) 0x1B);
             for (Map.Entry<String, WzProperty> entry : lWzProperty.entrySet()) {
                 String key = entry.getKey();
-                WzProperty value = entry.getValue();
 
-                value.write(stringWriterPool, key, stream);
+                WzProperty property = entry.getValue();
+                property.write(codec, key, stream);
             }
         }
 
@@ -89,7 +86,8 @@ public class WzDispatchProperty implements WzProperty {
         // log.warn("Writing dispatch: lengthPos={}, startPosition={}, endPosition={}, totalLength={}",
         //         lengthPosition, startPosition, endPosition, totalLength);
 
-        stream.getByteBuf().setIntLE(lengthPosition, totalLength);
+        ByteBuf byteBuf = stream.getByteBuf();
+        byteBuf.setIntLE(lengthPosition, totalLength);
     }
 
     public String getName() {

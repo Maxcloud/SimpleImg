@@ -1,11 +1,10 @@
 package img.property;
 
-import img.io.impl.ImgReadableInputStream;
+import img.crypto.WzStringCodec;
+import img.io.impl.ImgInputStream;
 import img.io.impl.ImgWritableOutputStream;
-import img.util.StringWriter;
 
 public interface WzProperty {
-    void read(ImgReadableInputStream stream);
-    void write(StringWriter wzStringPool, String key, ImgWritableOutputStream output);
-    default void parse(ImgReadableInputStream stream) { }
+    void read(WzStringCodec codec, ImgInputStream stream);
+    void write(WzStringCodec codec, String key, ImgWritableOutputStream output);
 }

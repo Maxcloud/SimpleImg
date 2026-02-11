@@ -1,58 +1,42 @@
 package img.io.repository;
 
-import java.io.*;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import img.io.deserialize.JsonFileToObject;
-import img.model.common.WzImgCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import img.model.common.FileImgRecord;
 
 public class JsonFileRepository<T> extends JsonFileToObject<T> {
 
-    Logger log = LoggerFactory.getLogger(JsonFileRepository.class);
-
-    private final Map<String, Long> stringToOffset  = new LinkedHashMap<>();
-    private final Map<Long, String> offsetToString  = new LinkedHashMap<>();
-    private final Map<Long, String> uolToString     = new LinkedHashMap<>();
+    private final Map<String, Long> mNameToOffset
+            = new LinkedHashMap<>();
+    private final Map<Long, String> mOffsetToName
+            = new LinkedHashMap<>();
+    private final Map<Long, String> mUolToString
+            = new LinkedHashMap<>();
 
     public JsonFileRepository(Path path, Class<T> clazz) {
         super(path, clazz);
     }
 
-    public void toOffset(String name, long offset) {
-        this.stringToOffset.put(name, offset);
+    public void setNameToOffset(String name, long offset) {
+        mNameToOffset.put(name, offset);
     }
 
-    public void toString(long offset, String name) {
-        this.offsetToString.put(offset, name);
+    public void setOffsetAndName(long offset, String name) {
+        mOffsetToName.put(offset, name);
     }
 
-    public void toUOL(long offset, String uol) { this.uolToString.put(offset, uol); }
+    public void setUolToString(long offset, String uol) { mUolToString.put(offset, uol); }
 
     public void saveAsJson() {
-        Path outputPath = getPath().resolveSibling(getPath().getFileName() + ".json");
-        WzImgCache cache = new WzImgCache(this.stringToOffset, this.offsetToString, this.uolToString);
-
-        try (FileWriter writer = new FileWriter(outputPath.toFile());
-             BufferedWriter bufferedWriter = new BufferedWriter(writer)) {
-
-            createDefaultGson().toJson(cache, bufferedWriter);
-        } catch (IOException io) {
-            log.error("An error occurred when saving the file.", io);
-        }
+        FileImgRecord oFileImgRecord = new FileImgRecord(
+                mNameToOffset,
+                mOffsetToName,
+                mUolToString
+        );
+        saveAsJson(oFileImgRecord);
     }
 
-    public WzImgCache OnLoadJsonAsObj() {
-        try (FileReader reader = new FileReader(getPath().toFile() + ".json");
-             BufferedReader bufferedReader = new BufferedReader(reader)) {
-
-            return createDefaultGson().fromJson(bufferedReader, WzImgCache.class);
-        } catch (IOException io) {
-            log.error("An error occurred when saving the file.", io);
-            return new WzImgCache(null, null, null);
-        }
-    }
 }

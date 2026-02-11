@@ -1,6 +1,6 @@
 package img;
 
-import img.model.common.WzImgCache;
+import img.model.common.FileImgRecord;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,10 +32,10 @@ public class WzPathNavigator {
         // this.uolStrings = Collections.emptyMap();
     }
 
-    public WzPathNavigator(String context, WzImgCache data) {
+    public WzPathNavigator(String context, FileImgRecord data) {
         this.context = context;
-        this.offsets = data.offsetCache();
-        this.strings = data.stringCache();
+        this.offsets = data.getOffsetCache();
+        this.strings = data.getStringCache();
         // this.uolStrings = data.uolCache();
     }
 

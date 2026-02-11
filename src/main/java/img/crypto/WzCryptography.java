@@ -28,6 +28,14 @@ public class WzCryptography {
         setEncryptionKey(this.iv);
     }
 
+    public WzCryptography(byte[] secret, int version) {
+        this.secret = secret;
+        this.version = version;
+
+        setInitializationVector();
+        setEncryptionKey(this.iv);
+    }
+
     public byte[] getSecret() {
         return secret;
     }

@@ -19,7 +19,7 @@ public class KeyFileRepository<T> extends JsonFileToObject<T> {
 
     public KeyFileRepository(Class<T> clazz) {
         super(Path.of("src/main/resources/version.json"), clazz);
-        wzVersion = (Version) createObjFromFile();
+        wzVersion = (Version) loadFromJson();
         setSecret(DEFAULT);
     }
 

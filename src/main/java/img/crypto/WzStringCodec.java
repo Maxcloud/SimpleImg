@@ -1,29 +1,33 @@
-package img.util;
+package img.crypto;
 
 import img.io.impl.ImgInputStream;
 import img.io.impl.ImgWritableOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class StringWriter {
+public class WzStringCodec {
+
+    Logger log = LoggerFactory.getLogger(WzStringCodec.class);
 
     public final Map<Long, String> fromArchive = new HashMap<>();
     public final Map<String, Long> toArchive = new HashMap<>();
 
-    public String internalDeserializeString(ImgInputStream stream) {
+    public String deserialize(ImgInputStream stream) {
         String result = null;
 
         byte type = stream.readByte();
         switch (type) {
-            case 0x00:
-            case 0x73:
+            case 0x00: // a new directory entry
+            case 0x73: // a new string entry
                 long index = stream.getPosition();
                 result = stream.decodeString();
                 fromArchive.put(index, result);
                 break;
-            case 0x01:
-            case 0x1B:
+            case 0x01: // an existing directory entry
+            case 0x1B: // an existing string entry
                 long num1 = stream.readInt();
                 if (fromArchive.get(num1) != null) {
                     result = fromArchive.get(num1);
@@ -33,14 +37,14 @@ public class StringWriter {
                 }
                 break;
             default:
-                System.out.println("Unhandled string type: (" + stream.getPath() + ")");
+                log.error("An unhandled flag found! Inside ({}) with flag: {}", stream.getPath(), type);
                 break;
         }
         return result;
     }
 
-    public void internalSerializeString(ImgWritableOutputStream output,
-                                        String name, byte bNew, byte bExists) {
+    public void serialize(ImgWritableOutputStream output,
+                          String name, byte bNew, byte bExists) {
 
         boolean isStringNull = toArchive.get(name) == null;
         output.writeByte(isStringNull ? bNew : bExists);

@@ -1,9 +1,9 @@
 package img.property;
 
+import img.crypto.WzStringCodec;
 import img.util.Variant;
-import img.io.impl.ImgReadableInputStream;
+import img.io.impl.ImgInputStream;
 import img.io.impl.ImgWritableOutputStream;
-import img.util.StringWriter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,12 +14,12 @@ public class WzPropertyList implements WzProperty {
     private final Map<String, WzProperty> lWzProperty = new LinkedHashMap<>();
 
     @Override
-    public void read(ImgReadableInputStream stream) {
+    public void read(WzStringCodec codec, ImgInputStream stream) {
         stream.readByte();
         stream.readByte();
         int children = stream.decodeInt();
         for (int i = 0; i < children; i++) {
-            parse(stream);
+            parse(codec, stream);
         }
     }
 
@@ -31,9 +31,8 @@ public class WzPropertyList implements WzProperty {
         return lWzProperty;
     }
 
-    @Override
-    public void parse(ImgReadableInputStream stream) {
-        String property_name = stream.getStringWriter().internalDeserializeString(stream);
+    public void parse(WzStringCodec codec, ImgInputStream stream) {
+        String property_name = codec.deserialize(stream);
         byte variant = stream.readByte();
 
         WzProperty property = getWzProperty(variant);
@@ -41,7 +40,7 @@ public class WzPropertyList implements WzProperty {
             return;
         }
 
-        property.read(stream);
+        property.read(codec, stream);
 
         if (property instanceof WzDispatchProperty prop) {
             if (prop.getName().equals("Canvas") ||
@@ -52,7 +51,6 @@ public class WzPropertyList implements WzProperty {
 
             if (prop.getProperties().isEmpty()) return;
         }
-
 
         lWzProperty.put(property_name, property);
     }
@@ -80,20 +78,19 @@ public class WzPropertyList implements WzProperty {
     }
 
     @Override
-    public void write(StringWriter stringWriterPool, String key, ImgWritableOutputStream output) {
+    public void write(WzStringCodec codec, String key, ImgWritableOutputStream output) {
         output.writeByte(0);
         output.writeByte(0);
-        if (lWzProperty.isEmpty()) {
-            output.writeCompressedInt(0); return;
-        }
 
-        output.writeCompressedInt(lWzProperty.size());
+        boolean isEmpty = lWzProperty.isEmpty();
+        output.writeCompressedInt(isEmpty ? 0 : lWzProperty.size());
+        if (isEmpty) return;
+
         for (Map.Entry<String, WzProperty> entry : lWzProperty.entrySet()) {
             String key0 = entry.getKey();
-            WzProperty value = entry.getValue();
 
-            value.write(stringWriterPool, key0, output);
+            WzProperty property = entry.getValue();
+            property.write(codec, key0, output);
         }
     }
-
 }

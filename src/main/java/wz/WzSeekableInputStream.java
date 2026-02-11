@@ -1,10 +1,11 @@
 package wz;
 
-import img.io.impl.ImgReadableInputStream;
+import img.crypto.WzStringHandler;
+import img.io.impl.ImgInputStream;
 
 import java.nio.file.Path;
 
-public class WzSeekableInputStream extends ImgReadableInputStream {
+public class WzSeekableInputStream extends ImgInputStream {
 
     private final int fileStart;
 
@@ -18,8 +19,8 @@ public class WzSeekableInputStream extends ImgReadableInputStream {
      *
      * @param path the path to the binary file
      */
-    public WzSeekableInputStream(Path path, byte[] secret) {
-        super(Path.of(""), path, secret);
+    public WzSeekableInputStream(Path path, WzStringHandler handle, byte[] secret) {
+        super(path, handle, secret);
 
         fileIdentification = readAsciiString(4);
         fileSize = readLong();

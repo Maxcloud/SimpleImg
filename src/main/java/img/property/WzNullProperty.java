@@ -1,6 +1,7 @@
 package img.property;
 
-import img.io.impl.ImgReadableInputStream;
+import img.crypto.WzStringCodec;
+import img.io.impl.ImgInputStream;
 import img.io.impl.ImgWritableOutputStream;
 import img.util.StringWriter;
 
@@ -9,13 +10,13 @@ public class WzNullProperty implements WzProperty {
     WzNullProperty() { }
 
     @Override
-    public void read(ImgReadableInputStream stream) { }
+    public void read(WzStringCodec codec, ImgInputStream stream) { }
 
     @Override
-    public void write(StringWriter stringWriterPool, String key,
+    public void write(WzStringCodec codec, String key,
                       ImgWritableOutputStream stream) {
 
-        stringWriterPool.internalSerializeString(stream, key, (byte) 0x00, (byte) 0x01);
+        codec.serialize(stream, key, (byte) 0x00, (byte) 0x01);
         stream.writeByte(0); // VT_EMPTY
     }
 }

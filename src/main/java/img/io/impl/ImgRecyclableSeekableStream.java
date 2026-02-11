@@ -12,13 +12,12 @@ import java.nio.file.Path;
  * A recyclable seekable stream built on top of Netty's {@link ByteBuf}.
  * Designed for efficient in-memory binary file reading with support for random access (seeking).
  */
-public class RecyclableSeekableStream implements AutoCloseable {
+public class ImgRecyclableSeekableStream implements AutoCloseable {
 
-    Logger log = LoggerFactory.getLogger(RecyclableSeekableStream.class);
+    Logger log = LoggerFactory.getLogger(ImgRecyclableSeekableStream.class);
 
     private final Path path;
     private ByteBuf byteBuf;
-    protected byte[] secret;
 
 
     public Path getPath() {
@@ -29,21 +28,24 @@ public class RecyclableSeekableStream implements AutoCloseable {
         return byteBuf;
     }
 
-    public byte[] getSecret() {
-        return secret;
-    }
-
     /**
      * Loads a file into memory and wraps it with a {@link ByteBuf} for binary access.
      *
      * @param path the path to the file to read
      */
-    public RecyclableSeekableStream(Path path, byte[] secret) {
+    public ImgRecyclableSeekableStream(Path path) {
         this.path = path;
-        this.secret = secret;
-
         try {
             byte[] data = Files.readAllBytes(path);
+            byteBuf = Unpooled.wrappedBuffer(data);
+        } catch (Exception e) {
+            log.error("An error has occurred while loading the file to memory. ", e);
+        }
+    }
+
+    public ImgRecyclableSeekableStream(Path path, byte[] data) {
+        this.path = path;
+        try {
             byteBuf = Unpooled.wrappedBuffer(data);
         } catch (Exception e) {
             log.error("An error has occurred while loading the file to memory. ", e);
@@ -69,6 +71,19 @@ public class RecyclableSeekableStream implements AutoCloseable {
         byte[] bytes = new byte[length];
         byteBuf.readBytes(bytes);
         return bytes;
+    }
+
+    public void readFully(byte[] b) {
+        byteBuf.readBytes(b);
+    }
+
+    /**
+     * Gets the number of readable bytes remaining in the stream.
+     *
+     * @return the number of readable bytes
+     */
+    public int readableBytes() {
+        return byteBuf.readableBytes();
     }
 
     /**

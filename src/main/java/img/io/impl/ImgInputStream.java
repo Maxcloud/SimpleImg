@@ -1,38 +1,40 @@
 package img.io.impl;
 
 import img.crypto.WzCryptography;
-import img.util.StringWriter;
+import img.crypto.WzDecodeRecord;
+import img.crypto.WzStringHandler;
 
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * Custom input stream for reading encoded strings and numbers from a binary file format.
- * Extends {@link RecyclableSeekableStream} to add decryption logic using {@link WzCryptography}.
+ * Extends {@link ImgRecyclableSeekableStream} to add decryption logic using {@link WzCryptography}.
  */
-public class ImgReadableInputStream extends RecyclableSeekableStream {
-    private final StringWriter stringWriter = new StringWriter();
+public class ImgInputStream extends ImgRecyclableSeekableStream {
 
-    private final Path name;
-
+    private final WzStringHandler handle;
     private final byte[] secret;
+    private final boolean isListImg;
 
     /**
      * Constructs a new stream by loading the img file into memory.
      *
      * @param path the path to the binary file
      */
-    public ImgReadableInputStream(Path name, Path path, byte[] secret) {
-        super(path, secret);
-        this.name = name;
+    public ImgInputStream(Path path, WzStringHandler handle, byte[] secret) {
+        super(path);
+        this.handle = handle;
         this.secret = secret;
+        this.isListImg = handle.isListImg(path);
     }
 
-    public Path getName() {
-        return name;
+    public WzStringHandler getHandle() {
+        return handle;
     }
 
-    public StringWriter getStringWriter() {
-        return stringWriter;
+    public byte[] getSecret() {
+        return secret;
     }
 
     /**
@@ -94,59 +96,26 @@ public class ImgReadableInputStream extends RecyclableSeekableStream {
         byte b = readByte();
         if (b == 0x00) return "";
 
-        /*int len;
-        if (b > 0) {
-            len = b == Byte.MAX_VALUE ? readInt() : b;
-        } else {
-            len = b == Byte.MIN_VALUE ? readInt() : -b;
-        }
-
-        if (len <= 0) {
-            return "";
-        }*/
-
         int len = (b == 0x7F || b == -128) ? readInt() : (b >= 0 ? b : -b);
         if (len < 0) {
             throw new IllegalStateException("String length cannot be negative: " + len);
         }
 
-        char[] str = new char[len];
-        if (b > 0) {
-            decodeUnicodeString(str);
-        } else {
-            decodeNonUnicodeString(str);
-        }
+        boolean isUnicode = (b > 0);
+        byte[] data = readBytes(isUnicode ? len * 2 : len);
 
-        return String.valueOf(str);
-    }
+        byte[] clone = data.clone();
+        WzDecodeRecord record = handle.decode(isUnicode, clone, 0, isListImg);
 
-    /**
-     * Decodes a Unicode string using a character XOR mask.
-     *
-     * @param str the character array to fill
-     */
-    private void decodeUnicodeString(char[] str) {
-        char mask = (char) 0xAAAA;
-        int len = str.length;
-        for (int i = 0; i < len; i++) {
-            char chr = readChar();
-            str[i] = (char) (chr ^ mask++);
-        }
-    }
+        String result = new String(
+                record.data(),
+                record.charset()
+        );
 
-    /**
-     * Decodes a non-Unicode string using a byte XOR key.
-     *
-     * @param str the character array to fill
-     */
-    private void decodeNonUnicodeString(char[] str) {
-        byte mask = (byte) 0xAA;
-        int len = str.length;
-        for (int i = 0; i < len; i++, mask++) {
-            byte cipherByte = readByte();
-            byte keyByte = (byte) (secret[i % secret.length] ^ mask);
-            str[i] = (char) ((cipherByte ^ keyByte) & 0xFF);
-        }
+        Objects.requireNonNull(result, "Be sure to provide a valid string decoding implementation.");
+        return result;
+
+
     }
 }
 
