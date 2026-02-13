@@ -1,11 +1,12 @@
 package img;
 
+import img.crypto.WzCryptography;
 import img.io.repository.KeyFileRepository;
 import img.model.common.Version;
 
 public class WzConfiguration {
 
-    private WzTestCryptography cryptography;
+    private WzCryptography cryptography;
     private final EnvironmentConfig environment;
 
     public WzConfiguration() {
@@ -25,15 +26,15 @@ public class WzConfiguration {
         return repository;
     }
 
-    public WzTestCryptography getCryptography() {
+    public WzCryptography getCryptography() {
         if (cryptography == null) {
-            cryptography = new WzTestCryptography(getRepository());
+            cryptography = new WzCryptography(getRepository());
         }
         return cryptography;
     }
 
     public byte[] getSecret() {
-        WzTestCryptography cryptography = getCryptography();
+        WzCryptography cryptography = getCryptography();
         return cryptography.getSecret();
     }
 }
