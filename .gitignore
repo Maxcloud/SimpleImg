@@ -1,6 +1,6 @@
 .idea/*
 out/*
-output/*
+release/*
 snippets/*
 strings/*
 target/*
