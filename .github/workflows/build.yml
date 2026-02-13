@@ -23,7 +23,7 @@ jobs:
         run: mvn -B package -Denv=common -DskipTests
 
       - name: Upload JAR
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: SimpleImg
           path: target/*.jar
