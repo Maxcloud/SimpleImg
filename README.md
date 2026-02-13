@@ -42,9 +42,13 @@ be stored in the same directory as the `.img` files.
 ### Example usage of the library to generate JSON files.
 
 ```java
+import img.WzConfiguration;
+
 public static void main(String[] args) {
-    String wzFilePath = System.getProperty("wz.path");
-    Path root = Path.of(wzFilePath);
+    WzConfiguration configuration = new WzConfiguration();
+    EnvironmentConfig environment = configuration.getEnvironment();
+    
+    Path root = Path.of(environment.get("simple.img.output"));
 
     SimpleImg exportJsonService = new SimpleImg();
     exportJsonService.dumpStringsToJson(root);
