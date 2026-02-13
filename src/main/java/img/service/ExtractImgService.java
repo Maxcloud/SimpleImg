@@ -26,8 +26,6 @@ public class ExtractImgService {
 
     private final Logger log = LoggerFactory.getLogger(ExtractImgService.class);
 
-    private static final Path configFile = Path.of("src/main/resources/configuration.json");
-
     private static final List<String> BASE_NAMES = List.of(
         "Character",
         "Effect",
@@ -120,7 +118,7 @@ public class ExtractImgService {
             }
         }
 
-        System.out.println("Successfully merged all files and folders.");
+        log.warn("Successfully merged all files and folders.");
     }
 
     private void MoveFolderContents(Path source, Path target) throws IOException {

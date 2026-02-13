@@ -11,7 +11,7 @@ public class EnvironmentConfig {
 
     private final Logger log;
 
-    private static final String CONFIG_FILE = "src/main/resources/config-%s.properties";
+    private static final String CONFIG_FILE = "release/config/config-%s.properties";
 
     private final Properties props;
 
