@@ -1,6 +1,6 @@
 name: Java CI
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   build:
@@ -13,4 +13,16 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
       - name: Build with Maven
-        run: mvn clean package
+        run: mvn -B clean compile -Denv=common
+
+      - name: Test with Maven
+        run: mvn -B test -Denv=common
+
+      - name: Package JAR
+        run: mvn -B package -Denv=common -DskipTests
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-app-jar
+          path: target/*.jar
