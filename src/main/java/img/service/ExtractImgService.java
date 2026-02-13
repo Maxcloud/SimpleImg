@@ -1,5 +1,6 @@
 package img.service;
 
+import img.EnvironmentConfig;
 import img.WzConfiguration;
 import img.io.deserialize.JsonFileToObject;
 import img.io.repository.KeyFileRepository;
@@ -45,20 +46,22 @@ public class ExtractImgService {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        WzConfiguration configuration = new WzConfiguration(configFile);
-        DirectoryConfiguration directoryConfiguration = configuration.getDirectories();
+        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environment = configuration.getEnvironment();
 
-        Path inputDirectory = Path.of(configuration.getInput());
-        outputDirectory = Path.of(configuration.getOutput());
-        boolean isMergeMode = directoryConfiguration.isMergeFolders();
+        String path = environment.get("simple.img.input");
+        Path input = Path.of(path);
+
+        outputDirectory = Path.of(environment.get("simple.img.output"));
+        boolean wants_to_merge_folders = Boolean.parseBoolean(environment.get("simple.img.merge"));
 
         secret = configuration.getSecret();
-        version = configuration.getVersion();
+        version = environment.getInt("simple.img.version");
 
         ExtractImgService service = new ExtractImgService();
-        service.readWzDirectory(inputDirectory);
+        service.readWzDirectory(input);
 
-        if (isMergeMode) {
+        if (wants_to_merge_folders) {
             System.out.println("Extraction Complete. Merging folders now.");
             Thread.sleep(1000);
 

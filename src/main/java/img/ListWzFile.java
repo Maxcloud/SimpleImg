@@ -15,8 +15,6 @@ public class ListWzFile {
 
     private final Logger log = LoggerFactory.getLogger(ListWzFile.class);
 
-    private final Path configFile = Path.of("src/main/resources/configuration.json");
-
     private List<String> entries = new ArrayList<>();
 
     public ListWzFile(Path path) {
@@ -30,7 +28,7 @@ public class ListWzFile {
      */
     private void read(Path path) {
 
-        WzConfiguration config = new WzConfiguration(configFile);
+        WzConfiguration config = new WzConfiguration();
         try {
             byte[] fileBytes = Files.readAllBytes(path);
             ByteBuffer buf = ByteBuffer.wrap(fileBytes).order(ByteOrder.LITTLE_ENDIAN);

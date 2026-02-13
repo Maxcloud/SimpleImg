@@ -1,5 +1,6 @@
 package img.service;
 
+import img.EnvironmentConfig;
 import img.WzConfiguration;
 import img.WzImgFileWriter;
 import org.slf4j.Logger;
@@ -19,8 +20,6 @@ public class RebuildImgService {
 
     Logger log = LoggerFactory.getLogger(RebuildImgService.class);
 
-    private static final Path configFile = Path.of("src/main/resources/configuration.json");
-
     private final WzConfiguration configuration;
 
     /**
@@ -29,11 +28,12 @@ public class RebuildImgService {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        WzConfiguration configuration = new WzConfiguration(configFile);
+        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environment = configuration.getEnvironment();
 
         System.out.println("Starting to re-write img files without canvas properties. Please wait...");
         var service = new RebuildImgService(configuration);
-        var output = configuration.getOutput();
+        Path output = Path.of(environment.get("simple.img.output"));
 
         service.writeImgFile(output);
         System.out.println("Operation completed. Please double check the logs for any errors.");

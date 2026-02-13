@@ -36,17 +36,17 @@ public class WzImgFileWriter {
             return;
         }
 
-        DirectoryConfiguration directories = configuration.getDirectories();
+        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environment = configuration.getEnvironment();
 
-        Path inputFileRoot = Path.of(configuration.getOutput());
-        Path outputFileRoot = Path.of(directories.getNewOutput());
+        Path inputFileRoot = Path.of(environment.get("simple.img.input"));
+        Path outputFileRoot = Path.of(environment.get("simple.img.output"));
         Path inputFilePath = inputFileRoot.relativize(inputFileName);
         Path outputFilePath = outputFileRoot.resolve(inputFilePath);
 
         Files.createDirectories(outputFilePath.getParent());
 
-        Path outputFileName = outputFilePath.getFileName();
-        int version = configuration.getVersion();
+        int version = environment.getInt("simple.img.version");
 
         WzStringHandler handler = new WzStringHandler(version, secret);
         WzStringCodec stringCodec = handler.getCodec();

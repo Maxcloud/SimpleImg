@@ -1,5 +1,7 @@
 package wz;
 
+import img.EnvironmentConfig;
+import img.WzConfiguration;
 import img.io.deserialize.JsonFileToObject;
 import img.configuration.DirectoryConfiguration;
 import img.io.impl.ImgRecyclableSeekableStream;
@@ -7,8 +9,6 @@ import img.io.impl.ImgRecyclableSeekableStream;
 import java.nio.file.Path;
 
 public class WzVersion {
-
-	private static final Path configFile = Path.of("src/main/resources/configuration.json");
 
 	private int hash;
 
@@ -18,11 +18,10 @@ public class WzVersion {
 	 * @param stream The stream to read the version hash from.
 	 */
 	public WzVersion(ImgRecyclableSeekableStream stream) {
-		JsonFileToObject<DirectoryConfiguration> fileToObject =
-				new JsonFileToObject<>(configFile, DirectoryConfiguration.class);
-		DirectoryConfiguration directoryConfiguration = fileToObject.loadFromJson();
+		WzConfiguration configuration = new WzConfiguration();
+		EnvironmentConfig environment = configuration.getEnvironment();
 
-		String version = directoryConfiguration.getVersion();
+		String version = environment.get("simple.img.version.string");
 		String[] parts = version.split(":", 3);
 		int mVersion = Integer.parseInt(parts[1]);
 

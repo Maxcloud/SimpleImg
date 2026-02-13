@@ -1,5 +1,6 @@
 package img.service;
 
+import img.EnvironmentConfig;
 import img.ListWzFile;
 import img.WzConfiguration;
 import img.crypto.WzStringHandler;
@@ -21,15 +22,14 @@ public class ExportJsonService {
 
     Logger log = LoggerFactory.getLogger(ExportJsonService.class);
 
-    private static final Path configFile = Path.of("src/main/resources/configuration.json");
-
     public static void main(String[] args) {
 
-        WzConfiguration configuration = new WzConfiguration(configFile);
+        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environment = configuration.getEnvironment();
 
-        Path outputDirectory = Path.of(configuration.getOutput());
+        Path outputDirectory = Path.of(environment.get("simple.img.output"));
 
-        int version = configuration.getVersion();
+        int version = environment.getInt("simple.img.version");
         byte[] secret = configuration.getSecret();
 
         System.out.println("Starting to dump strings to JSON. Please wait...");
