@@ -9,5 +9,6 @@ wz/*
 
 *.docx
 *.iml
+*.properties
 *.rtf
 *.txt
