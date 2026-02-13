@@ -47,11 +47,14 @@ import img.WzConfiguration;
 public static void main(String[] args) {
     WzConfiguration configuration = new WzConfiguration();
     EnvironmentConfig environment = configuration.getEnvironment();
-    
+
     Path root = Path.of(environment.get("simple.img.output"));
 
-    SimpleImg exportJsonService = new SimpleImg();
-    exportJsonService.dumpStringsToJson(root);
+    int version = environment.getInt("simple.img.version");
+    byte[] secret = configuration.getSecret();
+
+    SimpleImg simpleImg = new SimpleImg();
+    simpleImg.dumpStringsToJson(outputDirectory, version, secret);
 }
 ```
 
