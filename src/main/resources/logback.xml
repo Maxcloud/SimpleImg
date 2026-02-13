@@ -1,9 +1,12 @@
 <configuration>
-  <property name="LOG_DIR" value="logs" />
+    <property name="LOG_DIR" value="logs" />
 
     <!-- Error Log File -->
     <appender name="ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/error.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>20MB</maxFileSize>
@@ -15,9 +18,14 @@
         </encoder>
     </appender>
 
-    <!-- Connection Throttle Log File -->
+    <!-- Warn Log File -->
     <appender name="WARN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/warn.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOG_DIR}/warn-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>20MB</maxFileSize>
@@ -29,14 +37,28 @@
         </encoder>
     </appender>
 
-  <!-- Log Rules -->
-  <root level="ERROR">
-    <appender-ref ref="ERROR_LOG"/>
-  </root>
+    <!-- Debug Log File -->
+    <appender name="DEBUG_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_DIR}/debug.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_DIR}/debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>20MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
 
-  <!-- Log Rules -->
-  <root level="WARN">
-    <appender-ref ref="WARN_LOG"/>
-  </root>
+    <!-- Root Logger - set to DEBUG to capture all logs -->
+    <root level="DEBUG">
+        <appender-ref ref="DEBUG_LOG"/>
+        <appender-ref ref="WARN_LOG"/>
+        <appender-ref ref="ERROR_LOG"/>
+    </root>
 
 </configuration>
