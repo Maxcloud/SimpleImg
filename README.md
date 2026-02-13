@@ -6,14 +6,26 @@ Instead of parsing the entire `.img` structure on every access, this library pre
 
 Now also supports full extraction of .img files, making it easy to inspect.
 
+Update 2026-02-12: Complete refactoring.\
+Update 2026-02-13: Added support for older versions, such as version 55 and below.
+
+## :clipboard: Planned Features
+
+- Application interface to enable inspecting`.img` file contents using JSON metadata for quick navigation.
+- Editing support for `.img` files to modify properties and save changes back to the original file.
+- Filters to assist when rebuilding `.img` files to remove unused data and optimize file size.
+- Bin-diff support to quickly find differences between two `.img` files, useful for patching or version comparisons.
+ 
 ## :heavy_check_mark: Features
 
-- Parses `.img` files used in Mushroom data formats (e.g., `Etc.wz`, `Character.wz`).
+- Parses `.img` files used in mushroom data formats (e.g., `Etc.wz`, `Character.wz`).
 - Supports extracting full `.img` file contents to external format for inspection or processing.
 - Uses pre-generated `.json` files to map string paths to byte offsets.
 - High-performance file access using memory-mapped or byte-buffer-based I/O.
 - Auto-closes resources using `AutoCloseable` and try-with-resources.
 - Minimal object allocation and low overhead—ideal for high-frequency, real-time access.
+- Thread-safe design for concurrent access to multiple `.img` files.
+
 
 ## :heavy_check_mark: Structure
 
@@ -106,5 +118,6 @@ public class SetItemInfo {
     }
 }
 ```
+
 ### Credits
 [HaRepacker-Resurrected](https://github.com/lastbattle/Harepacker-resurrected/)
