@@ -12,13 +12,9 @@ public class WzCryptography {
 
     Logger log = LoggerFactory.getLogger(WzCryptography.class);
 
-    private static WzCryptography instance;
-
-    private WzCryptography() { }
-
     private byte[] iv;
     private byte[] secret;
-    private int version;
+    private final int version;
 
     public WzCryptography(KeyFileRepository<Version> repository) {
         this.version = repository.getVersion();
@@ -40,17 +36,10 @@ public class WzCryptography {
         return secret;
     }
 
-    public static synchronized WzCryptography getInstance() {
-        if (instance == null) {
-            instance = new WzCryptography();
-        }
-        return instance;
-    }
-
     public void setInitializationVector() {
         byte[] initial;
         if ((version <= 55 || version >= 117)) {
-            initial = new byte[] {0x00, 0x00, (byte) 0x00, 0x00};
+            initial = new byte[] {(byte) 0xB9, 0x7D, 0x63, (byte) 0xE9};
         } else {
             initial = new byte[] {0x4D, 0x23, (byte) 0xC7, 0x2B};
         }
@@ -62,9 +51,9 @@ public class WzCryptography {
     }
 
     public void setEncryptionKey(byte[] iv) {
-        if ((version <= 55 || version >= 117)) {
-            this.secret = this.iv;
-        } else {
+        //if ((version <= 55 || version >= 117)) {
+        //    this.secret = this.iv;
+        //} else {
             byte[] key = new byte[0x200000];
             try {
                 Cipher cipher = Cipher.getInstance("AES");
@@ -77,7 +66,7 @@ public class WzCryptography {
                 log.warn("An error occurred while setting the encryption key: {}", e.getMessage());
             }
             this.secret = key;
-        }
+        //}
     }
 
 }
