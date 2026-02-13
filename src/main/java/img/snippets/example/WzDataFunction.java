@@ -1,4 +1,4 @@
-package img.snippets.production;
+package img.snippets.example;
 
 import img.WzPathNavigator;
 import img.io.impl.ImgRecyclableSeekableStream;

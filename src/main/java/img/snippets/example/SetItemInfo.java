@@ -5,8 +5,6 @@ import img.ReadImgFile;
 import img.WzPathNavigator;
 import img.WzValueReader;
 import img.io.impl.ImgRecyclableSeekableStream;
-import img.snippets.production.EtcDataRequest;
-import img.snippets.production.WzDataFunction;
 
 public class SetItemInfo {
 

@@ -3,9 +3,9 @@ package img;
 import img.io.impl.ImgRecyclableSeekableStream;
 import img.io.repository.JsonFileRepository;
 import img.model.common.FileImgRecord;
-import img.snippets.production.WzDataConsumer;
-import img.snippets.production.WzDataFunction;
-import img.snippets.production.WzImplDataRequest;
+import img.snippets.example.WzDataConsumer;
+import img.snippets.example.WzDataFunction;
+import img.snippets.example.WzImplDataRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

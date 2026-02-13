@@ -1,12 +1,12 @@
-package img.snippets.production;
+package img.snippets.example;
 
 import java.nio.file.Path;
 
-public class EtcWzDataRequest implements ImplWzDataRequest {
+public class EtcDataRequest implements WzImplDataRequest {
 
     private final Path filePath;
 
-    public EtcWzDataRequest(String fileName) {
+    public EtcDataRequest(final String fileName) {
         String wzFilePath = System.getProperty("wz.path");
         Path imgFilePath = Path.of(wzFilePath);
 
