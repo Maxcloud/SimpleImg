@@ -3,7 +3,6 @@ package img.property;
 import img.crypto.WzStringCodec;
 import img.io.impl.ImgInputStream;
 import img.io.impl.ImgWritableOutputStream;
-import img.util.StringWriter;
 
 public class WzFloatProperty implements WzProperty {
 

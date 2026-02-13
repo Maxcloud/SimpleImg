@@ -32,7 +32,7 @@ public class ExportJsonService {
         int version = environment.getInt("simple.img.version");
         byte[] secret = configuration.getSecret();
 
-        System.out.println("Starting to dump strings to JSON. Please wait...");
+        System.out.println("Starting to dump strings to JSON. Please wait, this might take awhile...");
         ExportJsonService exportJsonService = new ExportJsonService();
         exportJsonService.dumpStringsToJson(outputDirectory, version, secret);
         System.out.println("Dumping strings to JSON completed. Please double check the logs for any errors.");

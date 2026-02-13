@@ -28,7 +28,7 @@ public class ExpressionEvaluation {
                     .build()
                     .setVariable(variable, level);
 
-            // System.out.println("Evaluating: [" + name + "] Result: (" + content + " with " + variable + "=" + level + " = " + result + ")");
+            // log.warn("Evaluating: [" + name + "] Result: (" + content + " with " + variable + "=" + level + " = " + result + ")");
             return (int) expression.evaluate();
         } catch (Exception e) {
             System.err.println("Failed to evaluate: " + name + " with " + variable + "=" + level);

@@ -4,11 +4,15 @@ import img.crypto.WzStringCodec;
 import img.util.Variant;
 import img.io.impl.ImgInputStream;
 import img.io.impl.ImgWritableOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class WzPropertyList implements WzProperty {
+
+    Logger log = LoggerFactory.getLogger(WzPropertyList.class);
 
     private final String name = "Property";
     private final Map<String, WzProperty> lWzProperty = new LinkedHashMap<>();
@@ -61,7 +65,7 @@ public class WzPropertyList implements WzProperty {
         try {
             variant_name = Variant.fromByte(variant);
         } catch (Exception e) {
-            System.out.println("Skipping file, property variant not found: " + variant);
+            log.error("Skipping file, property variant not found: {}", variant);
         }
 
         return switch (variant_name) {

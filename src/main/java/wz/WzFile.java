@@ -7,10 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -57,7 +55,7 @@ public class WzFile {
         try (WzSeekableInputStream stream = new WzSeekableInputStream(imgInputPath, handle, secret)) {
             parseImg(stream, target, getRoot());
         } catch (Exception e) {
-            System.out.println("An issue occurred while parsing. " + e);
+            log.error("An issue occurred while parsing. {}", e.getMessage());
         } finally {
             if (service != null) {
                 service.shutdown();
@@ -107,9 +105,6 @@ public class WzFile {
                                 log.error("An error occurred in the service, attempting to write the file.", e);
                             }
                             slice.release();
-                            // System.out.println("Writing " + file_path + "\\" + wzDataEntry.getName());
-                            // log.warn("File: ({}), Property: ({}/{}), Size: ({} k/b)", wzDataEntry.getName(),
-                            //        count.getAndIncrement(), entries, bytes / 1024);
                         } catch (Exception e) {
                             log.error("An error occurred in the service.", e);
                         }
@@ -133,7 +128,7 @@ public class WzFile {
                 parseImg(stream, target, dir);
             }
         } catch (Exception e) {
-            System.out.println("An issue occurred with an exception. " + e);
+            log.error("An issue occurred with an exception. " + e);
         }
 
     }

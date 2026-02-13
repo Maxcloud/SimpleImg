@@ -40,7 +40,7 @@ public class ReadImgFile {
             var oRoot = new WzPathNavigator(oImgPath, oFileImgRecord);
             return oConsumeRequest.apply(oStream, oRoot);
         } catch (Exception e) {
-            System.out.println(oResult.filePath().toAbsolutePath());
+            // System.out.println(oResult.filePath().toAbsolutePath());
             log.warn("Error reading files.", e);
             return null;
         }
@@ -72,7 +72,7 @@ public class ReadImgFile {
         var oImgCache = oImgFileCache.getImgCache();
         var oFilePath = oImgDataRequest.getFilePath();
         var oImgPath = oImgDataRequest.getImgPath();
-        System.out.println("Img Cache: " + oImgCache.keySet() + ", Requesting: " + oFilePath + " | " + oImgPath);
+        // log.warn("Img Cache: {}, Requesting: {} | {}", oImgCache.keySet(), oFilePath, oImgPath);
 
         var oRepository = new JsonFileRepository<>(oFilePath, FileImgRecord.class);
         var oFileImgRecord = oImgCache.computeIfAbsent(
