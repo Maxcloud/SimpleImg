@@ -26,4 +26,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: SimpleImg
-          path: target/SimpleImg-*.jar
+          path: ./*.jar
