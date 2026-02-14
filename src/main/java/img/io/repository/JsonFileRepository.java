@@ -28,7 +28,9 @@ public class JsonFileRepository<T> extends JsonFileToObject<T> {
         mOffsetToName.put(offset, name);
     }
 
-    public void setUolToString(long offset, String uol) { mUolToString.put(offset, uol); }
+    public void setUolToString(long offset, String uol) {
+        mUolToString.put(offset, uol);
+    }
 
     public void saveAsJson() {
         FileImgRecord oFileImgRecord = new FileImgRecord(
