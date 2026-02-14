@@ -50,7 +50,7 @@ public class WzFile {
         List<String> entries = listWzFile.getEntries();
 
         WzStringHandler handle = new WzStringHandler(version, secret);
-        handle.setModernImgFiles(entries);
+        handle.setListFiles(entries);
 
         try (WzSeekableInputStream stream = new WzSeekableInputStream(imgInputPath, handle, secret)) {
             parseImg(stream, target, getRoot());
