@@ -9,7 +9,7 @@ import java.util.Properties;
 
 public class EnvironmentConfig {
 
-    private final Logger log;
+    Logger log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
     private static final String CONFIG_FILE = "release/config/config-%s.properties";
 
@@ -17,7 +17,6 @@ public class EnvironmentConfig {
 
     public EnvironmentConfig() {
         props = new Properties();
-        log = LoggerFactory.getLogger(EnvironmentConfig.class);
 
         String oEnvironment = System.getProperty("env", "default");
         String oConfigFile  = String.format(CONFIG_FILE, oEnvironment);
