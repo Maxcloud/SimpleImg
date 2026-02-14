@@ -1,6 +1,7 @@
 package img.model.image;
 
 import img.ListWzFile;
+import img.crypto.WzStringCodec;
 import img.crypto.WzStringHandler;
 import img.io.impl.ImgInputStream;
 import img.util.Variant;
@@ -19,10 +20,12 @@ public class WzImage {
 
     private final int version;
     private final byte[] secret;
+    private final Path list;
 
-    public WzImage(int version, byte[] secret) {
-        this.version = version;
+    public WzImage(byte[] secret, int version, Path list) {
         this.secret = secret;
+        this.version = version;
+        this.list = list;
     }
 
     public void parse(Path path) {
@@ -30,14 +33,14 @@ public class WzImage {
             log.error("The file {} doesn't exist.", path.getFileName()); return;
         }
 
-        JsonFileRepository<WzImgCache> repository =
-                new JsonFileRepository<>(path, WzImgCache.class);
+        JsonFileRepository<WzImgCache> repository
+                = new JsonFileRepository<>(path, WzImgCache.class);
 
-        ListWzFile listWzFile = new ListWzFile(Path.of("E:\\MapleStory_55\\Maplestory\\List.wz"));
+        ListWzFile listWzFile = new ListWzFile(list);
         List<String> listWzFileNames = listWzFile.getEntries();
 
         WzStringHandler handle = new WzStringHandler(version, secret);
-        handle.setModernImgFiles(listWzFileNames);
+        handle.setListFiles(listWzFileNames);
 
         try (ImgInputStream stream = new ImgInputStream(path, handle, secret)) {
             parse("", path, stream, repository, 0);
@@ -49,10 +52,12 @@ public class WzImage {
 
     private void parse(String filePath, Path path, ImgInputStream stream,
                        JsonFileRepository<WzImgCache> cache, long offset) {
-
         long position = stream.getPosition();
 
-        String name = stream.getHandle().getCodec().deserialize(stream);
+        WzStringHandler handle = stream.getHandle();
+        WzStringCodec codec = handle.getCodec();
+        String name = codec.deserialize(stream);
+
         switch (name) {
             case "Property":
                 stream.readByte();
@@ -62,17 +67,18 @@ public class WzImage {
                     parse(filePath, path, stream, cache);
                 }
                 break;
+            case "UOL":
+                long uol_position = position - 5; // adjust 5 bytes for the dispatch pointer and the variant type
+                byte type = stream.readByte(); // variant type
+                String uol = codec.deserialize(stream);
+                // System.out.println("UOL found: (String: " + uol + ", Type " + type);
+                cache.setUolToString(uol_position, uol);
+                break;
             case "Shape2D#Vector2D":
                 /*long vector_position = stream.getPosition();
                 cache.toOffset(filePath, vector_position);
                 stream.decodeInt();
                 stream.decodeInt();
-                break;*/
-            case "UOL":
-                /*long uol_position = position - 5; // adjust 5 bytes for the dispatch pointer and the variant type
-                stream.skip(1); // variant type
-                String uol = stream.getStringWriter().internalDeserializeString(stream);
-                cache.getUolToString().put(uol_position, uol);
                 break;*/
             case "Canvas":
             case "Shape2D#Convex2D":
@@ -92,10 +98,12 @@ public class WzImage {
      *
      */
     private void parse(String filePath, Path path, ImgInputStream stream, JsonFileRepository<WzImgCache> cache) {
-        String name = stream.getHandle().getCodec().deserialize(stream);
+        WzStringHandler handle = stream.getHandle();
+        WzStringCodec codec = handle.getCodec();
+        String name = codec.deserialize(stream);
 
         filePath = filePath.isEmpty() ? name : filePath + "/" + name;
-        // System.out.println("Parsing property: " + filePath);
+        // System.out.println(path);
 
         long offset = stream.getPosition();
         cache.setNameToOffset(filePath, offset);
@@ -122,7 +130,7 @@ public class WzImage {
                 stream.readDouble();
                 break;
             case VT_BSTR:
-                String decryptedString = stream.getHandle().getCodec().deserialize(stream);
+                String decryptedString = codec.deserialize(stream);
                 cache.setOffsetAndName(offset, decryptedString);
                 break;
             case VT_DISPATCH:
@@ -130,7 +138,7 @@ public class WzImage {
                 parse(filePath, path, stream, cache, endOfBytes);
                 break;
             default:
-                log.warn("There was a missing property found for  {} ", filePath);
+                log.warn("There was a missing property found for {} ", filePath);
                 break;
         }
     }
