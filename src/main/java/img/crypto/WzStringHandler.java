@@ -18,7 +18,7 @@ public class WzStringHandler {
         } else {
             this.oAsciiString = new WzVersion83AsciiString(secret);
         }
-        this.oStringCodec   = new WzStringCodec();
+        this.oStringCodec = new WzStringCodec();
     }
 
     public WzStringCodec getCodec() {
@@ -34,7 +34,7 @@ public class WzStringHandler {
         return Collections.unmodifiableList(lListImgFiles);
     }
 
-    public void setModernImgFiles(List<String> lModernImgFiles) {
+    public void setListFiles(List<String> lModernImgFiles) {
         this.lListImgFiles = lModernImgFiles != null ?
                 List.copyOf(lModernImgFiles)
                 : Collections.emptyList();
