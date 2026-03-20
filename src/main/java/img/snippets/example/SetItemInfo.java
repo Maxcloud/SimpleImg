@@ -8,6 +8,20 @@ import img.io.impl.ImgRecyclableSeekableStream;
 
 public class SetItemInfo {
 
+    public static void main(String[] args) {
+        SetItemInfo oSetItemInfo = new SetItemInfo();
+
+        EtcDataRequest imgDataRequest = new EtcDataRequest("SetItemInfo.img");
+
+        ImgFileCache oImgFileCache = new ImgFileCache();
+        ReadImgFile oReadImgFile = new ReadImgFile(oImgFileCache);
+
+        WzDataFunction<SetItemInfoImg> oConsume = oSetItemInfo.getPfnCommon();
+        SetItemInfoImg oSetItemInfoImg = oReadImgFile.apply(imgDataRequest, oConsume);
+
+        System.out.println(oSetItemInfoImg.getSetItemName());
+    }
+
     public WzDataFunction<SetItemInfoImg> getPfnCommon() {
         return this::ok;
     }
@@ -22,7 +36,10 @@ public class SetItemInfo {
             reader = new WzValueReader(stream, child);
 
             String setItemName = reader.readString("setItemName");
+            setItemInfoImg.setSetItemName(setItemName);
+
             int completeCount = reader.readInt("completeCount");
+            setItemInfoImg.setCompleteCount(completeCount);
 
             WzPathNavigator pathItem = child.resolve("ItemID");
             for (String itemId : pathItem.getChildren()) {
@@ -61,17 +78,5 @@ public class SetItemInfo {
             }
         }
         return setItemInfoImg;
-    }
-
-    public static void main(String[] args) {
-        SetItemInfo oSetItemInfo = new SetItemInfo();
-
-        EtcDataRequest imgDataRequest = new EtcDataRequest("SetItemInfo.img");
-
-        ImgFileCache oImgFileCache = new ImgFileCache();
-        ReadImgFile oReadImgFile = new ReadImgFile(oImgFileCache);
-
-        WzDataFunction<SetItemInfoImg> oConsume = oSetItemInfo.getPfnCommon();
-        SetItemInfoImg oSetItemInfoImg = oReadImgFile.apply(imgDataRequest, oConsume);
     }
 }
