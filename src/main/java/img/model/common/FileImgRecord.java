@@ -9,14 +9,17 @@ public class FileImgRecord {
 
     private final Map<String, Long> offsetCache;
     private final Map<Long, String> stringCache;
+    private final Map<Long, String> vectorCache;
     private final Map<Long, String> uolCache;
     private byte[] bytes;
 
     public FileImgRecord(Map<String, Long> offsetCache,
                          Map<Long, String> stringCache,
+                         Map<Long, String> vectorCache,
                          Map<Long, String> uolCache) {
         this.offsetCache = offsetCache;
         this.stringCache = stringCache;
+        this.vectorCache = vectorCache;
         this.uolCache = uolCache;
     }
 
@@ -38,6 +41,10 @@ public class FileImgRecord {
 
     public Map<Long, String> getStringCache() {
         return stringCache;
+    }
+
+    public Map<Long, String> getVectorCache() {
+        return vectorCache;
     }
 
     public Map<Long, String> getUolCache() {

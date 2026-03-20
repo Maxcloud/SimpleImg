@@ -9,10 +9,16 @@ import img.model.common.FileImgRecord;
 
 public class JsonFileRepository<T> extends JsonFileToObject<T> {
 
+    /** path and offset data */
     private final Map<String, Long> mNameToOffset
             = new LinkedHashMap<>();
+    /** offset and path data **/
     private final Map<Long, String> mOffsetToName
             = new LinkedHashMap<>();
+    /** offset and vec data **/
+    private final Map<Long, String> mOffsetToVec
+            = new LinkedHashMap<>();
+    /** offset and uol data **/
     private final Map<Long, String> mUolToString
             = new LinkedHashMap<>();
 
@@ -28,6 +34,10 @@ public class JsonFileRepository<T> extends JsonFileToObject<T> {
         mOffsetToName.put(offset, name);
     }
 
+    public void setOffsetToVec(long offset, String name) {
+        mOffsetToVec.put(offset, name);
+    }
+
     public void setUolToString(long offset, String uol) {
         mUolToString.put(offset, uol);
     }
@@ -36,6 +46,7 @@ public class JsonFileRepository<T> extends JsonFileToObject<T> {
         FileImgRecord oFileImgRecord = new FileImgRecord(
                 mNameToOffset,
                 mOffsetToName,
+                mOffsetToVec,
                 mUolToString
         );
         saveAsJson(oFileImgRecord);
