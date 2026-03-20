@@ -1,22 +1,30 @@
 package img.snippets.example;
 
+import img.EnvironmentConfig;
+import img.WzConfiguration;
+
 import java.nio.file.Path;
 
 public class EtcDataRequest implements WzImplDataRequest {
 
+    private final String imgPath;
     private final Path filePath;
 
     public EtcDataRequest(final String fileName) {
-        String wzFilePath = System.getProperty("wz.path");
-        Path imgFilePath = Path.of(wzFilePath);
+        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environment = configuration.getEnvironment();
+
+        Path output = Path.of(environment.get("simple.img.output"));
 
         String imgPath = "Etc.wz/%s".formatted(fileName);
-        this.filePath = imgFilePath.resolve(imgPath);
+
+        this.imgPath = output.resolve(imgPath).toString();
+        this.filePath = Path.of(this.imgPath + ".json");
     }
 
     @Override
     public String getImgPath() {
-        return "";
+        return imgPath;
     }
 
     @Override
