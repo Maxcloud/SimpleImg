@@ -13,11 +13,12 @@ public class WzStringHandler {
 
     public WzStringHandler(int version, byte[] secret) {
         this.oUnicodeString = new WzUnicodeString();
-        if (version <= 55) {
+        /*if (version <= 55) {
             this.oAsciiString = new WzVersion55AsciiString(secret);
         } else {
             this.oAsciiString = new WzVersion83AsciiString(secret);
-        }
+        }*/
+        this.oAsciiString = new WzAsciiString(secret);
         this.oStringCodec = new WzStringCodec();
     }
 
@@ -27,7 +28,7 @@ public class WzStringHandler {
 
     public boolean isListImg(Path path) {
         String fileName = path.getFileName().toString();
-        return lListImgFiles != null && lListImgFiles.contains(fileName);
+        return lListImgFiles.contains(fileName);
     }
 
     public List<String> getListImgFiles() {

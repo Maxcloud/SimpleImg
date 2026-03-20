@@ -10,6 +10,7 @@ import java.util.Map;
 
 public class WzDispatchProperty implements WzProperty {
 
+    private static final byte VT_DISPATCH = 9;
     private String name = "Property";
     private final Map<String, WzProperty> lWzProperty = new LinkedHashMap<>();
 
@@ -54,7 +55,9 @@ public class WzDispatchProperty implements WzProperty {
 
     @Override
     public void write(WzStringCodec codec, String key, ImgWritableOutputStream output) {
-
+        codec.serialize(output, key, (byte) 0x00, (byte) 0x01);
+        output.writeByte(VT_DISPATCH);
+        writeDispatch(codec, output);
     }
 
     /**
