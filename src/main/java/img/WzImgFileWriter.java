@@ -40,7 +40,7 @@ public class WzImgFileWriter {
         EnvironmentConfig environment = configuration.getEnvironment();
 
         Path inputFileRoot = Path.of(environment.get("simple.img.input"));
-        Path outputFileRoot = Path.of(environment.get("simple.img.output"));
+        Path outputFileRoot = Path.of(environment.get("simple.img.new.output"));
         Path inputFilePath = inputFileRoot.relativize(inputFileName);
         Path outputFilePath = outputFileRoot.resolve(inputFilePath);
 
