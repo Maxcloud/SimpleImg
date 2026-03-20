@@ -1,6 +1,5 @@
 package img.model.image;
 
-import img.ListWzFile;
 import img.crypto.WzStringCodec;
 import img.crypto.WzStringHandler;
 import img.io.impl.ImgInputStream;
@@ -20,12 +19,12 @@ public class WzImage {
 
     private final int version;
     private final byte[] secret;
-    private final Path list;
+    private final List<String> wzList;
 
-    public WzImage(byte[] secret, int version, Path list) {
+    public WzImage(byte[] secret, int version, List<String> wzList) {
         this.secret = secret;
         this.version = version;
-        this.list = list;
+        this.wzList = wzList;
     }
 
     public void parse(Path path) {
@@ -36,11 +35,8 @@ public class WzImage {
         JsonFileRepository<WzImgCache> repository
                 = new JsonFileRepository<>(path, WzImgCache.class);
 
-        ListWzFile listWzFile = new ListWzFile(list);
-        List<String> listWzFileNames = listWzFile.getEntries();
-
         WzStringHandler handle = new WzStringHandler(version, secret);
-        handle.setListFiles(listWzFileNames);
+        handle.setListFiles(wzList);
 
         try (ImgInputStream stream = new ImgInputStream(path, handle, secret)) {
             parse("", path, stream, repository, 0);
@@ -53,7 +49,6 @@ public class WzImage {
     private void parse(String filePath, Path path, ImgInputStream stream,
                        JsonFileRepository<WzImgCache> cache, long offset) {
         long position = stream.getPosition();
-
         WzStringHandler handle = stream.getHandle();
         WzStringCodec codec = handle.getCodec();
         String name = codec.deserialize(stream);
@@ -71,15 +66,14 @@ public class WzImage {
                 long uol_position = position - 5; // adjust 5 bytes for the dispatch pointer and the variant type
                 byte type = stream.readByte(); // variant type
                 String uol = codec.deserialize(stream);
-                // System.out.println("UOL found: (String: " + uol + ", Type " + type);
                 cache.setUolToString(uol_position, uol);
                 break;
             case "Shape2D#Vector2D":
-                /*long vector_position = stream.getPosition();
-                cache.toOffset(filePath, vector_position);
+                long vector_position = stream.getPosition();
+                cache.setOffsetToVec(vector_position, filePath);
                 stream.decodeInt();
                 stream.decodeInt();
-                break;*/
+                break;
             case "Canvas":
             case "Shape2D#Convex2D":
             case "Sound_DX8":
