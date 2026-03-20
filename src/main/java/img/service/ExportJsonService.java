@@ -1,6 +1,7 @@
 package img.service;
 
 import img.EnvironmentConfig;
+import img.ListWzFile;
 import img.WzConfiguration;
 import img.model.image.WzImage;
 import org.slf4j.Logger;
@@ -8,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 
 /**
  * SimpleImg is a utility class that traverses a directory structure,
@@ -33,22 +36,34 @@ public class ExportJsonService {
         Path list = Path.of(environment.get("simple.img.list"));
         int version = environment.getInt("simple.img.version");
 
-        byte[] secret = configuration.getSecret();
-        WzImage image = new WzImage(secret, version, list);
+        ListWzFile listWzFile = new ListWzFile(list);
+        List<String> llist = listWzFile.getEntries();
 
-        try (var paths = Files.walk(root)) {
-            paths.parallel()
-                    .filter(this::fnExcluded)
-                    .filter(Files::isRegularFile)
-                    .forEach(image::parse);
+        byte[] secret = configuration.getSecret();
+        try {
+            Files.walkFileTree(root, new SimpleFileVisitor<>() {
+
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    if (file.toString().endsWith(".json")) {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    WzImage image = new WzImage(secret, version, llist);
+                    image.parse(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) {
+                    log.error("Failed to visit file: {}", file, exc);
+                    return FileVisitResult.CONTINUE;
+                }
+
+            });
+
         } catch (IOException e) {
             log.error("An error has occurred while walking the file tree.", e);
         }
-    }
-
-    private boolean fnExcluded(Path oPath) {
-        String sName = oPath.getFileName().toString();
-        return sName.endsWith(".json");
     }
 }
 
