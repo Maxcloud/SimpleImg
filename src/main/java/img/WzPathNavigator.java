@@ -11,7 +11,7 @@ public class WzPathNavigator {
     private final String context;
     private final Map<String, Long> offsets;
     private final Map<Long, String> strings;
-    // private final Map<Long, String> uolStrings;
+    private final Map<Long, String> uolStrings;
 
     public String getContext() {
         return context;
@@ -29,21 +29,21 @@ public class WzPathNavigator {
         this.context = "";
         this.offsets = Collections.emptyMap();
         this.strings = Collections.emptyMap();
-        // this.uolStrings = Collections.emptyMap();
+        this.uolStrings = Collections.emptyMap();
     }
 
     public WzPathNavigator(String context, FileImgRecord data) {
         this.context = context;
         this.offsets = data.getOffsetCache();
         this.strings = data.getStringCache();
-        // this.uolStrings = data.uolCache();
+        this.uolStrings = data.getUolCache();
     }
 
-    private WzPathNavigator(String context, Map<String, Long> offsets, Map<Long, String> strings/*, Map<Long, String> uolStrings*/) {
+    private WzPathNavigator(String context, Map<String, Long> offsets, Map<Long, String> strings, Map<Long, String> uolStrings) {
         this.context = context;
         this.offsets = offsets;
         this.strings = strings;
-        // this.uolStrings = uolStrings;
+        this.uolStrings = uolStrings;
     }
 
     public WzPathNavigator resolve(String format, Object... args) {
@@ -58,7 +58,7 @@ public class WzPathNavigator {
             // log.debug("Path not found: {}", newContext);
             return new WzPathNavigator(); // silent fail
         }
-        return new WzPathNavigator(newContext, offsets, strings);
+        return new WzPathNavigator(newContext, offsets, strings, uolStrings);
     }
 
     public List<String> getChildren() {
