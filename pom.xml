@@ -6,7 +6,7 @@
 
     <groupId>cdn.simpleimg</groupId>
     <artifactId>simpleimg</artifactId>
-    <version>1.5.3</version>
+    <version>1.5.4</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -42,11 +42,12 @@
             <version>1.5.29</version>
             <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/io.netty/netty-buffer -->
+        <!-- Source: https://mvnrepository.com/artifact/io.netty/netty-all -->
         <dependency>
             <groupId>io.netty</groupId>
-            <artifactId>netty-buffer</artifactId>
-            <version>4.1.119.Final</version>
+            <artifactId>netty-all</artifactId>
+            <version>4.2.10.Final</version>
+            <scope>compile</scope>
         </dependency>
         <!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
