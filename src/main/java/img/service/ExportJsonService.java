@@ -22,7 +22,8 @@ public class ExportJsonService {
     Logger log = LoggerFactory.getLogger(ExportJsonService.class);
 
     public static void main(String[] args) {
-        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environmentConfig = new EnvironmentConfig();
+        WzConfiguration configuration = new WzConfiguration(environmentConfig);
 
         System.out.println("Starting to dump strings to JSON. Please wait, this might take awhile...");
         ExportJsonService exportJsonService = new ExportJsonService();

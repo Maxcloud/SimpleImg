@@ -14,7 +14,8 @@ public class WzVersion {
 	 * @param stream The stream to read the version hash from.
 	 */
 	public WzVersion(ImgRecyclableSeekableStream stream) {
-		WzConfiguration configuration = new WzConfiguration();
+		EnvironmentConfig environmentConfig = new EnvironmentConfig();
+		WzConfiguration configuration = new WzConfiguration(environmentConfig);
 		EnvironmentConfig environment = configuration.getEnvironment();
 
 		String version = environment.get("simple.img.version.string");

@@ -27,8 +27,8 @@ public class ListWzFile {
      * @param path the path to the List.wz file
      */
     private void read(Path path) {
-
-        WzConfiguration config = new WzConfiguration();
+        EnvironmentConfig environmentConfig = new EnvironmentConfig();
+        WzConfiguration config = new WzConfiguration(environmentConfig);
         try {
             byte[] fileBytes = Files.readAllBytes(path);
             ByteBuffer buf = ByteBuffer.wrap(fileBytes).order(ByteOrder.LITTLE_ENDIAN);

@@ -9,8 +9,8 @@ public class WzConfiguration {
     private WzCryptography cryptography;
     private final EnvironmentConfig environment;
 
-    public WzConfiguration() {
-        this.environment = new EnvironmentConfig();
+    public WzConfiguration(EnvironmentConfig environment) {
+        this.environment = environment;
     }
 
     public EnvironmentConfig getEnvironment() {

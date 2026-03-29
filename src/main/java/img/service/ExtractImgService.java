@@ -44,7 +44,8 @@ public class ExtractImgService {
 
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environmentConfig = new EnvironmentConfig();
+        WzConfiguration configuration = new WzConfiguration(environmentConfig);
         EnvironmentConfig environment = configuration.getEnvironment();
 
         String path = environment.get("simple.img.input");

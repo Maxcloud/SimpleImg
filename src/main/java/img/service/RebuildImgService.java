@@ -28,7 +28,8 @@ public class RebuildImgService {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environmentConfig = new EnvironmentConfig();
+        WzConfiguration configuration = new WzConfiguration(environmentConfig);
         EnvironmentConfig environment = configuration.getEnvironment();
 
         System.out.println("Starting to re-write img files without canvas properties. Please wait...");
