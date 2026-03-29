@@ -41,8 +41,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
         this.path = path;
         try {
             byte[] data = Files.readAllBytes(path);
-            readBuf = Unpooled.buffer(data.length);
-            readBuf.writeBytes(data);
+            readBuf = Unpooled.wrappedBuffer(data);
         } catch (Exception e) {
             log.error("An error has occurred while loading the file to memory. ", e);
         }
@@ -51,8 +50,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
     public ImgRecyclableSeekableStream(Path path, byte[] data) {
         this.path = path;
         try {
-            readBuf = Unpooled.buffer(data.length);
-            readBuf.writeBytes(data);
+            readBuf = Unpooled.wrappedBuffer(data);
         } catch (Exception e) {
             log.error("An error has occurred while loading the file to memory. ", e);
         }
