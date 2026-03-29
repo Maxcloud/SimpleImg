@@ -32,16 +32,16 @@ public class ReadImgFile {
     public <T> T apply(WzImplDataRequest oImgDataRequest, WzDataFunction<T> oConsumeRequest) {
         var oResult = getImgRecord(oImgDataRequest);
 
-        var oFilePath = oResult.filePath();
         var oImgPath = oResult.imgPath();
         var oFileImgRecord = oResult.fileImgRecord();
 
-        try (var oStream = new ImgRecyclableSeekableStream(oFilePath)) {
-            var oRoot = new WzPathNavigator(oImgPath, oFileImgRecord);
+        try (var oStream = new ImgRecyclableSeekableStream(oImgPath)) {
+            var oRoot = new WzPathNavigator("", oFileImgRecord);
             return oConsumeRequest.apply(oStream, oRoot);
         } catch (Exception e) {
-            // System.out.println(oResult.filePath().toAbsolutePath());
-            log.warn("Error reading files.", e);
+            System.out.println("An error occurred. Please check the logs for more details.");
+            log.warn("The file ({}) is being used by another process. Please close any applications " +
+                    "that might be using the file and try again.", oImgPath.getFileName(), e);
             return null;
         }
     }
@@ -56,7 +56,7 @@ public class ReadImgFile {
         var oResult = getImgRecord(oImgDataRequest);
 
         var oFilePath = oResult.filePath();
-        var oImgPath = oResult.imgPath();
+        var oImgPath = oResult.imgPath().toString();
         var oFileImgRecord = oResult.fileImgRecord();
 
         try(var oStream = new ImgRecyclableSeekableStream(oFilePath)) {
@@ -68,10 +68,10 @@ public class ReadImgFile {
     }
 
     private ImgRecord getImgRecord(WzImplDataRequest oImgDataRequest) {
-
         var oImgCache = oImgFileCache.getImgCache();
-        var oFilePath = oImgDataRequest.getFilePath();
+
         var oImgPath = oImgDataRequest.getImgPath();
+        var oFilePath = oImgDataRequest.getFilePath();
         // log.warn("Img Cache: {}, Requesting: {} | {}", oImgCache.keySet(), oFilePath, oImgPath);
 
         var oRepository = new JsonFileRepository<>(oFilePath, FileImgRecord.class);
@@ -82,6 +82,6 @@ public class ReadImgFile {
         return new ImgRecord(oFilePath, oImgPath, oFileImgRecord);
     }
 
-    private record ImgRecord(Path filePath, String imgPath, FileImgRecord fileImgRecord) { }
+    private record ImgRecord(Path filePath, Path imgPath, FileImgRecord fileImgRecord) { }
 
 }
