@@ -7,23 +7,31 @@ import java.nio.file.Path;
 
 public class EtcDataRequest implements WzImplDataRequest {
 
-    private final String imgPath;
+    private final String imgName;
+    private final Path imgPath;
     private final Path filePath;
 
     public EtcDataRequest(final String fileName) {
-        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environmentConfig = new EnvironmentConfig();
+        WzConfiguration configuration = new WzConfiguration(environmentConfig);
         EnvironmentConfig environment = configuration.getEnvironment();
 
         Path output = Path.of(environment.get("simple.img.output"));
 
+        imgName = fileName.replace(".img", "");
         String imgPath = "Etc.wz/%s".formatted(fileName);
 
-        this.imgPath = output.resolve(imgPath).toString();
+        this.imgPath = output.resolve(imgPath);
         this.filePath = Path.of(this.imgPath + ".json");
     }
 
     @Override
-    public String getImgPath() {
+    public String getImgName() {
+        return imgName;
+    }
+
+    @Override
+    public Path getImgPath() {
         return imgPath;
     }
 
