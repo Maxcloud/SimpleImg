@@ -83,7 +83,7 @@ public class WzFile {
                 Files.createDirectories(target);
             }
 
-            ByteBuf buf = stream.getByteBuf();
+            ByteBuf buf = stream.getReadBuf();
             int entries = stream.decodeInt();
             for (int i = 0; i < entries; i++) {
                 byte type = stream.readByte();
