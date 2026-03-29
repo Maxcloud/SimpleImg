@@ -5,6 +5,8 @@ import io.netty.buffer.Unpooled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -16,16 +18,18 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
 
     Logger log = LoggerFactory.getLogger(ImgRecyclableSeekableStream.class);
 
-    private final Path path;
-    private ByteBuf byteBuf;
+    private static final Charset ASCII = StandardCharsets.US_ASCII;
+
+    private Path path;
+    private ByteBuf readBuf;
 
 
     public Path getPath() {
         return path;
     }
 
-    public ByteBuf getByteBuf() {
-        return byteBuf;
+    public ByteBuf getReadBuf() {
+        return readBuf;
     }
 
     /**
@@ -37,7 +41,8 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
         this.path = path;
         try {
             byte[] data = Files.readAllBytes(path);
-            byteBuf = Unpooled.wrappedBuffer(data);
+            readBuf = Unpooled.buffer(data.length);
+            readBuf.writeBytes(data);
         } catch (Exception e) {
             log.error("An error has occurred while loading the file to memory. ", e);
         }
@@ -46,10 +51,15 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
     public ImgRecyclableSeekableStream(Path path, byte[] data) {
         this.path = path;
         try {
-            byteBuf = Unpooled.wrappedBuffer(data);
+            readBuf = Unpooled.buffer(data.length);
+            readBuf.writeBytes(data);
         } catch (Exception e) {
             log.error("An error has occurred while loading the file to memory. ", e);
         }
+    }
+
+    public ImgRecyclableSeekableStream(ByteBuf readBuf) {
+        this.readBuf = readBuf;
     }
 
     /**
@@ -58,7 +68,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the byte read
      */
     public byte readByte() {
-        return byteBuf.readByte();
+        return readBuf.readByte();
     }
 
     /**
@@ -69,12 +79,12 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      */
     public byte[] readBytes(int length) {
         byte[] bytes = new byte[length];
-        byteBuf.readBytes(bytes);
+        readBuf.readBytes(bytes);
         return bytes;
     }
 
     public void readFully(byte[] b) {
-        byteBuf.readBytes(b);
+        readBuf.readBytes(b);
     }
 
     /**
@@ -83,7 +93,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the number of readable bytes
      */
     public int readableBytes() {
-        return byteBuf.readableBytes();
+        return readBuf.readableBytes();
     }
 
     /**
@@ -92,7 +102,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the short read
      */
     public short readShort() {
-        return byteBuf.readShortLE();
+        return readBuf.readShortLE();
     }
 
     /**
@@ -101,7 +111,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the integer read
      */
     public int readInt() {
-        return byteBuf.readIntLE();
+        return readBuf.readIntLE();
     }
 
     /**
@@ -119,7 +129,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the long read
      */
     public long readLong() {
-        return byteBuf.readLongLE();
+        return readBuf.readLongLE();
     }
 
     /**
@@ -128,7 +138,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the float read
      */
     public float readFloat() {
-        return byteBuf.readFloatLE();
+        return readBuf.readFloatLE();
     }
 
     /**
@@ -137,18 +147,29 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the double read
      */
     public double readDouble() {
-        return byteBuf.readDoubleLE();
+        return readBuf.readDoubleLE();
     }
 
     /**
      * Reads a fixed-length ASCII string from the current position.
      *
-     * @param n the number of bytes to read
+     * @param len the number of bytes to read
      * @return the resulting string
      */
-    public String readAsciiString(int n) {
-        byte[] bytes = readBytes(n);
-        return new String(bytes);
+    public String readAsciiString(int len) {
+        ByteBuf tempBuf = readBuf.readSlice(len);
+        return tempBuf.toString(ASCII);
+    }
+
+    /**
+     * Reads a maple-convention ASCII string from the current position.
+     * The string is prefixed with a 2-byte short indicating its length.
+     *
+     * @return the resulting string
+     */
+    public final String readMapleAsciiString() {
+        short len = readShort();
+        return readAsciiString(len);
     }
 
     /**
@@ -174,7 +195,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @param num the number of bytes to skip
      */
     public void skip(int num) {
-        byteBuf.skipBytes(num);
+        readBuf.skipBytes(num);
     }
 
     /**
@@ -183,7 +204,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @param offset the target offset to seek to
      */
     public void seek(long offset) {
-        byteBuf.readerIndex((int) offset);
+        readBuf.readerIndex((int) offset);
     }
 
     /**
@@ -192,7 +213,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the current offset in the stream
      */
     public long getPosition() {
-        return byteBuf.readerIndex();
+        return readBuf.readerIndex();
     }
 
     /**
@@ -201,15 +222,15 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return true if readable bytes remain, false otherwise
      */
     public boolean remaining() {
-        return byteBuf.isReadable();
+        return readBuf.isReadable();
     }
 
     /**
      * Resets the buffer by clearing it (reader and writer index to 0).
      */
     public void reset() {
-        if (byteBuf != null) {
-            byteBuf.clear();
+        if (readBuf != null) {
+            readBuf.clear();
         }
     }
 
@@ -218,13 +239,13 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      */
     @Override
     public synchronized void close() {
-        if (byteBuf != null) {
+        if (readBuf != null) {
             try {
-                if (byteBuf.refCnt() > 0) {
-                    byteBuf.release();
+                if (readBuf.refCnt() > 0) {
+                    readBuf.release();
                 }
             } finally {
-                byteBuf = null;
+                readBuf = null;
             }
         }
     }
