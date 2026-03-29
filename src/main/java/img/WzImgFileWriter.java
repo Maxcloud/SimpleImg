@@ -36,7 +36,8 @@ public class WzImgFileWriter {
             return;
         }
 
-        WzConfiguration configuration = new WzConfiguration();
+        EnvironmentConfig environmentConfig = new EnvironmentConfig();
+        WzConfiguration configuration = new WzConfiguration(environmentConfig);
         EnvironmentConfig environment = configuration.getEnvironment();
 
         Path inputFileRoot = Path.of(environment.get("simple.img.input"));
