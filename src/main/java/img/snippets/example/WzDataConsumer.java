@@ -1,7 +1,7 @@
 package img.snippets.example;
 
 import img.WzPathNavigator;
-import img.io.impl.ImgRecyclableSeekableStream;
+import img.io.ImgRecyclableSeekableStream;
 
 @FunctionalInterface
 public interface WzDataConsumer {
