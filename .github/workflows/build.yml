@@ -2,6 +2,10 @@ name: Java CI
 
 on: [ push, pull_request ]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,6 +16,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
       - name: Build with Maven
         run: mvn -B clean compile -Denv=common
@@ -29,6 +36,8 @@ jobs:
           path: ./*.jar
 
       - name: Publish to GitHub Packages
+        if: github.event_name == 'push'
         run: mvn --batch-mode deploy
         env:
-          GITHUB_TOKEN: ${{ secrets.SECRET_TOKEN }}  # Automatically provided
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
