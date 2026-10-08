@@ -6,6 +6,7 @@ Instead of parsing the entire `.img` structure on every access, this library pre
 
 Now also supports full extraction of .img files, making it easy to inspect.
 
+Update 2026-10-08: Changed to a command line tool.\
 Update 2026-02-12: Complete refactoring.\
 Update 2026-02-13: Added support for older versions, such as version 55 and below.
 
