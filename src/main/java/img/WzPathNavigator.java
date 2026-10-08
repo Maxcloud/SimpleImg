@@ -1,7 +1,5 @@
 package img;
 
-import img.model.common.FileImgRecord;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +9,7 @@ public class WzPathNavigator {
     private final String context;
     private final Map<String, Long> offsets;
     private final Map<Long, String> strings;
+    private final Map<Long, String> vectorStrings;
     private final Map<Long, String> uolStrings;
 
     public String getContext() {
@@ -25,10 +24,19 @@ public class WzPathNavigator {
         return strings;
     }
 
+    public Map<Long, String> getVectorStrings() {
+        return vectorStrings;
+    }
+
+    public Map<Long, String> getUolStrings() {
+        return uolStrings;
+    }
+
     public WzPathNavigator() {
         this.context = "";
         this.offsets = Collections.emptyMap();
         this.strings = Collections.emptyMap();
+        this.vectorStrings = Collections.emptyMap();
         this.uolStrings = Collections.emptyMap();
     }
 
@@ -36,13 +44,16 @@ public class WzPathNavigator {
         this.context = context;
         this.offsets = data.getOffsetCache();
         this.strings = data.getStringCache();
+        this.vectorStrings = data.getVectorCache();
         this.uolStrings = data.getUolCache();
     }
 
-    private WzPathNavigator(String context, Map<String, Long> offsets, Map<Long, String> strings, Map<Long, String> uolStrings) {
+    private WzPathNavigator(String context, Map<String, Long> offsets, Map<Long, String> strings,
+                            Map<Long, String> vectorStrings, Map<Long, String> uolStrings) {
         this.context = context;
         this.offsets = offsets;
         this.strings = strings;
+        this.vectorStrings = vectorStrings;
         this.uolStrings = uolStrings;
     }
 
@@ -58,7 +69,7 @@ public class WzPathNavigator {
             // log.debug("Path not found: {}", newContext);
             return new WzPathNavigator(); // silent fail
         }
-        return new WzPathNavigator(newContext, offsets, strings, uolStrings);
+        return new WzPathNavigator(newContext, offsets, strings, vectorStrings, uolStrings);
     }
 
     public List<String> getChildren() {
@@ -85,9 +96,5 @@ public class WzPathNavigator {
     public String getString(long offset) {
         return getStrings().getOrDefault(offset, "");
     }
-
-    /*public String getUolString(long offset) {
-        return getUolStrings().getOrDefault(offset, "");
-    }*/
 
 }

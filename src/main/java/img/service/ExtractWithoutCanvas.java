@@ -9,15 +9,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
-public class RebuildWithoutCanvas {
-    private final Logger logger = LoggerFactory.getLogger(RebuildWithoutCanvas.class);
+public class ExtractWithoutCanvas {
+    private final Logger logger = LoggerFactory.getLogger(ExtractWithoutCanvas.class);
 
     private final Path outPath;
     private final Path inPath;
     private final short version;
     private final byte[] secret;
 
-    public RebuildWithoutCanvas(Path outPath, Path inPath, short version, byte[] secret) {
+    public ExtractWithoutCanvas(Path outPath, Path inPath, short version, byte[] secret) {
         this.outPath = outPath;
         this.inPath = inPath;
         this.version = version;
@@ -35,7 +35,7 @@ public class RebuildWithoutCanvas {
         } else if (Files.isRegularFile(oPath)) {
             try {
                 WzImgFileWriter writeImgFile = new WzImgFileWriter(
-                        outPath, inPath, version, secret);
+                        inPath, outPath, version, secret);
                 writeImgFile.parse(oPath);
             } catch (Exception e) {
                 logger.error("An error occurred when processing {}.", oPath.getFileName(), e);

@@ -1,8 +1,6 @@
 package wz;
 
-import img.EnvironmentConfig;
-import img.WzConfiguration;
-import img.io.impl.ImgRecyclableSeekableStream;
+import img.io.ImgRecyclableSeekableStream;
 
 public class WzVersion {
 
@@ -11,19 +9,12 @@ public class WzVersion {
     /**
 	 * Constructs a WzVersion object from a RecyclableSeekableStream.
 	 *
-	 * @param stream The stream to read the version hash from.
+	 * @param in The stream to read the version hash from.
+	 * @param version The game version the file belongs to (e.g. 95).
 	 */
-	public WzVersion(ImgRecyclableSeekableStream stream) {
-		EnvironmentConfig environmentConfig = new EnvironmentConfig();
-		WzConfiguration configuration = new WzConfiguration(environmentConfig);
-		EnvironmentConfig environment = configuration.getEnvironment();
-
-		String version = environment.get("simple.img.version.string");
-		String[] parts = version.split(":", 3);
-		int mVersion = Integer.parseInt(parts[1]);
-
-		this.hash = stream.readShort();
-		CheckAndGetVersionHash(hash, mVersion);
+	public WzVersion(ImgRecyclableSeekableStream in, int version) {
+		this.hash = in.readShort();
+		CheckAndGetVersionHash(hash, version);
 	}
 
 	public int getHash() {

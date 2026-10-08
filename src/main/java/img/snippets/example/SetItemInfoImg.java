@@ -167,6 +167,4 @@ public class SetItemInfoImg {
     public void setIncJump(int incJump) {
         this.incJump = incJump;
     }
-
-
 }

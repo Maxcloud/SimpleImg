@@ -1,8 +1,8 @@
 package wz;
 
-import img.ListWzFile;
-import img.crypto.WzStringHandler;
+import img.crypto.WzString;
 import io.netty.buffer.ByteBuf;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,63 +16,73 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class WzFile {
-
-    Logger log = LoggerFactory.getLogger(WzFile.class);
+    private final Logger logger = LoggerFactory.getLogger(WzFile.class);
 
     private ExecutorService service;
 
-    private final Path imgInputPath;
-    private final Path imgOutputPath;
+    private final Path inPath;
+    private final Path outPath;
     private final int version;
     private final byte[] secret;
+    @Getter
     private final WzDirectory root;
 
-    public WzFile(Path imgInputPath, Path imgOutputPath, int version, byte[] secret) {
-        this.imgInputPath = imgInputPath;
-        this.imgOutputPath = imgOutputPath;
+    public WzFile(Path inPath, Path outPath, int version, byte[] secret) {
+        this.inPath = inPath;
+        this.outPath = outPath;
         this.version = version;
         this.secret = secret;
         this.root = new WzDirectory("");
         init();
     }
 
-    public WzDirectory getRoot() {
-        return root;
-    }
-
     private void init() {
-        Path target = imgOutputPath.resolve(imgInputPath.getFileName());
+        var target = outPath.resolve(inPath.getFileName());
 
         service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         boolean isTerminated;
 
-        ListWzFile listWzFile = new ListWzFile(Path.of("E:\\MapleStory_83\\Maplestory\\List.wz"));
-        List<String> entries = listWzFile.getEntries();
-
-        WzStringHandler handle = new WzStringHandler(version, secret);
+        var entries = readListWz(inPath.resolveSibling("List.wz"));
+        var handle = new WzString(version, secret);
         handle.setListFiles(entries);
 
-        try (WzSeekableInputStream stream = new WzSeekableInputStream(imgInputPath, handle, secret)) {
+        try (var stream = new WzSeekableInputStream(inPath, handle, secret, version)) {
             parseImg(stream, target, getRoot());
         } catch (Exception e) {
-            log.error("An issue occurred while parsing. {}", e.getMessage());
+            logger.error("An issue occurred while parsing. {}", e.getMessage());
         } finally {
             if (service != null) {
                 service.shutdown();
                 try {
                     isTerminated = service.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
                     if (isTerminated) {
-                        System.out.println("Decompressed " + imgInputPath.getFileName());
+                        System.out.println("Decompressed " + inPath.getFileName());
                     } else {
                         service.shutdownNow();
-                        log.error("An operation failed and the service was shut down");
+                        logger.error("An operation failed and the service was shut down");
                     }
                 } catch (Exception e) {
                     service.shutdownNow();
                     Thread.currentThread().interrupt();
-                    log.error("Thread was interrupted. ", e);
+                    logger.error("Thread was interrupted. ", e);
                 }
             }
+        }
+    }
+
+    /**
+     * Reads the img file names from List.wz; a missing or unreadable list
+     * must not abort extraction, so anything but success returns an empty list.
+     */
+    private List<String> readListWz(Path listWz) {
+        if (!Files.isRegularFile(listWz)) {
+            return List.of();
+        }
+        try {
+            return new ListWzFile(listWz, secret).entries();
+        } catch (Exception e) {
+            logger.warn("Could not read {}. Strings in list-encoded files may not decode.", listWz, e);
+            return List.of();
         }
     }
 
@@ -102,11 +112,11 @@ public class WzFile {
                                 FileChannel channel = fos.getChannel();
                                 bytes = channel.write(slice.nioBuffer());
                             } catch (Exception e) {
-                                log.error("An error occurred in the service, attempting to write the file.", e);
+                                logger.error("An error occurred in the service, attempting to write the file.", e);
                             }
                             slice.release();
                         } catch (Exception e) {
-                            log.error("An error occurred in the service.", e);
+                            logger.error("An error occurred in the service.", e);
                         }
                     });
 
@@ -121,14 +131,13 @@ public class WzFile {
 
                     directory.addDirectory(wz_directory);
                 }
-
             }
 
             for (WzDirectory dir : directory.getSubdirectories()) {
                 parseImg(stream, target, dir);
             }
         } catch (Exception e) {
-            log.error("An issue occurred with an exception. " + e);
+            logger.error("An issue occurred with an exception. {}", String.valueOf(e));
         }
 
     }

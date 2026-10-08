@@ -4,8 +4,12 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import img.WzVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KeyFileRepository<T> extends JsonFileToObject<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(KeyFileRepository.class);
 
     private static final String DEFAULT = "8:1:1";
 
@@ -32,6 +36,9 @@ public class KeyFileRepository<T> extends JsonFileToObject<T> {
         String[] parts = regionVersionAndRevision.split(":", 3);
         String encryptionKey = lEncryptionKeys.get(regionVersionAndRevision);
         if (encryptionKey == null) {
+            log.warn("No encryption key for '{}'; falling back to '{}'. " +
+                    "Expected the 'region:version:revision' format used in version.json.",
+                    regionVersionAndRevision, DEFAULT);
             parts = DEFAULT.split(":", 3);
             encryptionKey = lEncryptionKeys.get(DEFAULT);
         }

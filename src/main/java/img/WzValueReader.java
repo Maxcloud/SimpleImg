@@ -1,7 +1,9 @@
 package img;
 
-import img.io.impl.ImgRecyclableSeekableStream;
-import img.util.Variant;
+import img.io.ImgRecyclableSeekableStream;
+import img.ext.Variant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.Map;
@@ -9,6 +11,7 @@ import java.util.Objects;
 
 
 public record WzValueReader(ImgRecyclableSeekableStream stream, WzPathNavigator directory) {
+    private final static Logger logger = LoggerFactory.getLogger(WzValueReader.class);
 
     public short readShort(String property) {
         return readShort(property, (short) 0);
@@ -122,7 +125,7 @@ public record WzValueReader(ImgRecyclableSeekableStream stream, WzPathNavigator 
         long offset = directory().getOffset(attr);
         String result = directory().getString(offset);
         if (result == null) {
-            // log.warn("Couldn't find property path ({}) in the img file.", attr);
+            logger.warn("Couldn't find property path ({}) in the img file.", attr);
         }
         return result;
     }

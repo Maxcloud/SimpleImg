@@ -1,7 +1,7 @@
 package wz;
 
-import img.crypto.WzStringHandler;
-import img.io.impl.ImgInputStream;
+import img.crypto.WzString;
+import img.io.ImgInputStream;
 
 import java.nio.file.Path;
 
@@ -18,15 +18,16 @@ public class WzSeekableInputStream extends ImgInputStream {
      * Constructs a new stream by loading the wz file into memory.
      *
      * @param path the path to the binary file
+     * @param version the game version, used to recover the version hash
      */
-    public WzSeekableInputStream(Path path, WzStringHandler handle, byte[] secret) {
+    public WzSeekableInputStream(Path path, WzString handle, byte[] secret, int version) {
         super(path, handle, secret);
 
         fileIdentification = readAsciiString(4);
         fileSize = readLong();
         fileStart = readInt();
         fileCopyright = readNullTerminatedAsciiString();
-        version = new WzVersion(this);
+        this.version = new WzVersion(this, version);
     }
 
     public String decodeStringBlock(byte type) {
