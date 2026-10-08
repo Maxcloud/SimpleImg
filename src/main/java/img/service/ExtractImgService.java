@@ -1,30 +1,17 @@
 package img.service;
 
-import img.EnvironmentConfig;
-import img.WzConfiguration;
-import img.io.deserialize.JsonFileToObject;
-import img.io.repository.KeyFileRepository;
-import img.configuration.DirectoryConfiguration;
-import img.crypto.WzCryptography;
-import img.model.common.Version;
+import img.ext.MoveFileVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import wz.WzFile;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/**
- * Extracts img files from .wz files and merges them into a single,
- * folder structure.
- *
- */
 public class ExtractImgService {
-
-    private final Logger log = LoggerFactory.getLogger(ExtractImgService.class);
+    private final Logger logger = LoggerFactory.getLogger(ExtractImgService.class);
 
     private static final List<String> BASE_NAMES = List.of(
         "Character",
@@ -38,43 +25,21 @@ public class ExtractImgService {
         "Sound"
     );
 
-    private static Path outputDirectory;
-    private static int version;
-    private static byte[] secret;
+    private final Path target;
+    private final short version;
+    private final byte[] secret;
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-
-        EnvironmentConfig environmentConfig = new EnvironmentConfig();
-        WzConfiguration configuration = new WzConfiguration(environmentConfig);
-        EnvironmentConfig environment = configuration.getEnvironment();
-
-        String path = environment.get("simple.img.input");
-        Path input = Path.of(path);
-
-        outputDirectory = Path.of(environment.get("simple.img.output"));
-        boolean wants_to_merge_folders = Boolean.parseBoolean(environment.get("simple.img.merge"));
-
-        secret = configuration.getSecret();
-        version = environment.getInt("simple.img.version");
-
-        ExtractImgService service = new ExtractImgService();
-        service.readWzDirectory(input);
-
-        if (wants_to_merge_folders) {
-            System.out.println("Extraction Complete. Merging folders now.");
-            Thread.sleep(1000);
-
-            service.MergeFolderContents(outputDirectory);
-        } else {
-            System.out.println("Extraction Complete.");
-        }
+    public ExtractImgService(Path target, short version, byte[] secret) {
+        this.target = target;
+        this.version = version;
+        this.secret = secret;
     }
 
     public void readWzDirectory(Path oPath) {
         try (var stream = Files.list(oPath)) {
             stream.filter(this::fnExcluded).forEach(this::walkFileTree);
         } catch (Exception e) {
-            log.error("Error reading files: {}", e.getMessage());
+            logger.error("Error reading files: {}", e.getMessage());
         }
     }
 
@@ -91,61 +56,36 @@ public class ExtractImgService {
             readWzDirectory(oPath);
         } else if (isRegularFile) {
             try {
-                new WzFile(oPath, outputDirectory, version, secret);
+                new WzFile(oPath, target, version, secret);
             } catch (Exception e) {
-                log.error("An error occurred when processing {}.", oPath.getFileName(), e);
+                logger.error("An error occurred when processing {}.", oPath.getFileName(), e);
             }
         }
     }
 
-    private void MergeFolderContents(Path outputPath) throws IOException {
-        for (String folderName : BASE_NAMES) {
-            Path target = outputPath.resolve(folderName + ".wz");
+    public void fnMoveFiles(Path outputPath) throws IOException {
+        for (String file : BASE_NAMES) {
+            var target = outputPath.resolve(file + ".wz");
 
             if (!Files.exists(target)) {
                 Files.createDirectories(target);
             }
 
-            String quote = Pattern.quote(folderName);
-            Pattern numberedFolderPattern = Pattern.compile(quote + "\\d+\\.wz");
+            String quote = Pattern.quote(file);
+            Pattern pattern = Pattern.compile(quote + "\\d+\\.wz");
 
             try (var stream = Files.newDirectoryStream(outputPath)) {
                 for (Path entry : stream) {
-                    String path = entry.getFileName().toString();
-                    if (Files.isDirectory(entry) && numberedFolderPattern.matcher(path).matches()) {
-                        MoveFolderContents(entry, target);
+                    var path = entry.getFileName().toString();
+                    boolean matches = pattern.matcher(path).matches();
+                    if (Files.isDirectory(entry) && matches) {
+                        // bound per folder: move entry's contents into the merged target
+                        Files.walkFileTree(entry, new MoveFileVisitor(entry, target));
                     }
                 }
             }
         }
 
-        log.warn("Successfully merged all files and folders.");
+        logger.warn("Successfully merged all files and folders.");
     }
-
-    private void MoveFolderContents(Path source, Path target) throws IOException {
-
-        SimpleFileVisitor<Path> visitor = new SimpleFileVisitor<>() {
-
-            @Override
-            public FileVisitResult visitFile(Path file,
-                                             BasicFileAttributes attributes) throws IOException {
-
-                Path destination = target.resolve(source.relativize(file));
-                Files.createDirectories(destination.getParent());
-                Files.move(file, destination, StandardCopyOption.REPLACE_EXISTING);
-                return FileVisitResult.CONTINUE;
-            }
-
-            @Override
-            public FileVisitResult postVisitDirectory(Path directory,
-                                                      IOException exception) throws IOException {
-
-                Files.delete(directory);
-                return FileVisitResult.CONTINUE;
-            }
-        };
-
-        Files.walkFileTree(source, visitor);
-    }
-
 }

@@ -4,7 +4,7 @@ import img.ImgFileCache;
 import img.ReadImgFile;
 import img.WzPathNavigator;
 import img.WzValueReader;
-import img.io.impl.ImgRecyclableSeekableStream;
+import img.io.ImgRecyclableSeekableStream;
 
 public class SetItemInfo {
 

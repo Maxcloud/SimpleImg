@@ -1,8 +1,7 @@
 package img;
 
-import img.io.impl.ImgRecyclableSeekableStream;
-import img.io.repository.JsonFileRepository;
-import img.model.common.FileImgRecord;
+import img.io.ImgRecyclableSeekableStream;
+import img.json.JsonFileRepository;
 import img.snippets.example.WzDataConsumer;
 import img.snippets.example.WzDataFunction;
 import img.snippets.example.WzImplDataRequest;

@@ -1,13 +1,20 @@
 .idea/*
+.synapt/*
+.zcode/*
+logs/*
 out/*
+output/*
 release/*
 snippets/*
+
+src/test/*
 strings/*
 target/*
 wz/*
 
 *.docx
 *.iml
+*.md
 *.properties
 *.rtf
 *.txt

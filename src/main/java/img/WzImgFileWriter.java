@@ -1,11 +1,10 @@
 package img;
 
-import img.configuration.DirectoryConfiguration;
-import img.crypto.WzStringCodec;
-import img.crypto.WzStringHandler;
-import img.io.impl.ImgInputStream;
-import img.io.impl.ImgWritableOutputStream;
-import img.model.common.WzImgFile;
+import img.crypto.WzString;
+import img.crypto.WzStringRegistry;
+import img.io.ImgInputStream;
+import img.io.ImgWritableOutputStream;
+import wz.property.WzPropertyList;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -18,12 +17,17 @@ import java.nio.file.Path;
 
 public class WzImgFileWriter {
 
-    private final WzConfiguration configuration;
+    private final Path inPath;
+    private final Path outPath;
+    private final short version;
     private final byte[] secret;
+    private WzPropertyList property;
 
-    public WzImgFileWriter(WzConfiguration configuration) {
-        this.configuration = configuration;
-        secret = configuration.getSecret();
+    public WzImgFileWriter(Path inPath, Path outPath, short version, byte[] secret) {
+        this.inPath = inPath;
+        this.outPath = outPath;
+        this.version = version;
+        this.secret = secret;
     }
 
     static Logger log = LoggerFactory.getLogger(WzImgFileWriter.class);
@@ -36,31 +40,26 @@ public class WzImgFileWriter {
             return;
         }
 
-        EnvironmentConfig environmentConfig = new EnvironmentConfig();
-        WzConfiguration configuration = new WzConfiguration(environmentConfig);
-        EnvironmentConfig environment = configuration.getEnvironment();
-
-        Path inputFileRoot = Path.of(environment.get("simple.img.input"));
-        Path outputFileRoot = Path.of(environment.get("simple.img.new.output"));
-        Path inputFilePath = inputFileRoot.relativize(inputFileName);
-        Path outputFilePath = outputFileRoot.resolve(inputFilePath);
+        Path inputFilePath = inPath.relativize(inputFileName);
+        Path outputFilePath = outPath.resolve(inputFilePath);
 
         Files.createDirectories(outputFilePath.getParent());
 
-        int version = environment.getInt("simple.img.version");
+        WzString str = new WzString(version, secret);
+        WzStringRegistry registry = str.getRegistry();
 
-        WzStringHandler handler = new WzStringHandler(version, secret);
-        WzStringCodec stringCodec = handler.getCodec();
+        try (var in = new ImgInputStream(inputFileName, str, secret)) {
+            registry.deserialize(in);
 
-        WzImgFile imgFile = new WzImgFile(stringCodec);
-        try (ImgInputStream stream = new ImgInputStream(inputFileName, handler, secret)) {
-            imgFile.parse(stream);
+            this.property = new WzPropertyList();
+            this.property.read(registry, in);
         } catch (Exception e) {
             log.error("An error occurred when parsing {}.", inputFileName.getFileName(), e);
         }
 
-        try (ImgWritableOutputStream output = new ImgWritableOutputStream(byteBuf, secret)) {
-            imgFile.write("Property", output);
+        try (var out = new ImgWritableOutputStream(byteBuf, secret)) {
+            registry.serialize(out, "Property");
+            property.write(registry, "Property", out);
 
             byte[] bytes = ByteBufUtil.getBytes(byteBuf);
             Files.write(outputFilePath, bytes);

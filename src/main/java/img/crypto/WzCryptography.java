@@ -1,7 +1,7 @@
 package img.crypto;
 
-import img.io.repository.KeyFileRepository;
-import img.model.common.Version;
+import img.json.KeyFileRepository;
+import img.WzVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,14 +9,13 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 public class WzCryptography {
-
-    Logger log = LoggerFactory.getLogger(WzCryptography.class);
+    private final Logger logger = LoggerFactory.getLogger(WzCryptography.class);
 
     private byte[] iv;
     private byte[] secret;
     private final int version;
 
-    public WzCryptography(KeyFileRepository<Version> repository) {
+    public WzCryptography(KeyFileRepository<WzVersion> repository) {
         this.version = repository.getVersion();
         this.secret = repository.getSecret();
 
@@ -30,7 +29,11 @@ public class WzCryptography {
 
     public void setInitializationVector() {
         byte[] initial;
-        if ((version <= 55 || version >= 117)) {
+        if (version <= 55) {
+            // BMS classic era: zero IV. The derived key is all zeros, so
+            // strings carry nothing but the 0xAA+i / 0xAAAA+i masks.
+            initial = new byte[4];
+        } else if (version >= 117) {
             initial = new byte[] {(byte) 0xB9, 0x7D, 0x63, (byte) 0xE9};
         } else {
             initial = new byte[] {0x4D, 0x23, (byte) 0xC7, 0x2B};
@@ -43,22 +46,26 @@ public class WzCryptography {
     }
 
     public void setEncryptionKey(byte[] iv) {
-        //if ((version <= 55 || version >= 117)) {
-        //    this.secret = this.iv;
-        //} else {
-            byte[] key = new byte[0x200000];
-            try {
-                Cipher cipher = Cipher.getInstance("AES");
-                cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(secret, "AES"));
-                for (int i = 0; i < (0xFFFF / 16); i++) {
-                    iv = cipher.doFinal(iv);
-                    System.arraycopy(iv, 0, key, (i * 16), 16);
-                }
-            } catch (Exception e) {
-                log.warn("An error occurred while setting the encryption key: {}", e.getMessage());
+        /*boolean zeroIv = true;
+        for (byte b : iv) {
+            if (b != 0) {
+                zeroIv = false;
+                break;
             }
-            this.secret = key;
-        //}
+        }*/
+
+        byte[] key = new byte[0x200000];
+        try {
+            Cipher cipher = Cipher.getInstance("AES");
+            cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(secret, "AES"));
+            for (int i = 0; i < (0xFFFF / 16); i++) {
+                iv = cipher.doFinal(iv);
+                System.arraycopy(iv, 0, key, (i * 16), 16);
+            }
+        } catch (Exception e) {
+            logger.warn("An error occurred while setting the encryption key: {}", e.getMessage());
+        }
+        this.secret = key;
     }
 
 }

@@ -1,5 +1,5 @@
 package img.crypto;
-public class WzAsciiString implements WzStringDecodeImpl {
+public class WzAsciiString implements IWzStringDecode {
 
     private final byte[] secret;
     private final byte[] aAlphabet;
@@ -8,6 +8,17 @@ public class WzAsciiString implements WzStringDecodeImpl {
         this.secret = secret;
         WzAlphabet alphabet = new WzAlphabet();
         aAlphabet = alphabet.getAlphabet();
+    }
+
+    /**
+     * Classic decryption with an explicit key table. The middle-era
+     * wz files (v62 to v92) pass the 64 KiB key from
+     * {@link WzKeyGenerator}; v55-era files keep the default
+     * all-zero alphabet, degenerating to the plain 0xAA+i mask.
+     */
+    public WzAsciiString(byte[] secret, byte[] alphabet) {
+        this.secret = secret;
+        this.aAlphabet = alphabet;
     }
 
     @Override
