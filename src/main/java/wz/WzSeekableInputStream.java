@@ -30,6 +30,26 @@ public class WzSeekableInputStream extends ImgInputStream {
         this.version = new WzVersion(this, version);
     }
 
+    public int getFileStart() {
+        return fileStart;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public String getFileIdentification() {
+        return fileIdentification;
+    }
+
+    public String getFileCopyright() {
+        return fileCopyright;
+    }
+
+    public WzVersion getVersion() {
+        return version;
+    }
+
     public String decodeStringBlock(byte type) {
         String result = null;
         switch (type) {
@@ -85,23 +105,4 @@ public class WzSeekableInputStream extends ImgInputStream {
         return (x << n) | (x >>> (32 - n));
     }
 
-    public int getFileStart() {
-        return fileStart;
-    }
-
-    public long getFileSize() {
-        return fileSize;
-    }
-
-    public String getFileIdentification() {
-        return fileIdentification;
-    }
-
-    public String getFileCopyright() {
-        return fileCopyright;
-    }
-
-    public WzVersion getVersion() {
-        return version;
-    }
 }

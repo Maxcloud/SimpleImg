@@ -5,7 +5,6 @@ import img.ext.Variant;
 import img.io.ImgInputStream;
 import img.io.ImgWritableOutputStream;
 import io.netty.buffer.ByteBuf;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,12 +12,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class WzPropertyList implements WzProperty {
+    private static final Logger logger = LoggerFactory.getLogger(WzPropertyList.class);
 
-    Logger log = LoggerFactory.getLogger(WzPropertyList.class);
-
-    @Getter
     private final String name = "Property";
     private final Map<String, WzProperty> lWzProperty = new LinkedHashMap<>();
+
+    public String getName() {
+        return name;
+    }
+
+    public Map<String, WzProperty> getProperties() {
+        return lWzProperty;
+    }
 
     @Override
     public void read(WzStringRegistry codec, ImgInputStream stream) {
@@ -28,10 +33,6 @@ public class WzPropertyList implements WzProperty {
         for (int i = 0; i < children; i++) {
             parse(codec, stream);
         }
-    }
-
-    public Map<String, WzProperty> getProperties() {
-        return lWzProperty;
     }
 
     public void parse(WzStringRegistry codec, ImgInputStream stream) {
@@ -64,7 +65,7 @@ public class WzPropertyList implements WzProperty {
         try {
             variant_name = Variant.fromByte(variant);
         } catch (Exception e) {
-            log.error("Skipping file, property variant not found: {}", variant);
+            logger.error("Skipping file, property variant not found: {}", variant);
         }
 
         return switch (variant_name) {

@@ -2,7 +2,6 @@ package wz;
 
 import img.crypto.WzString;
 import io.netty.buffer.ByteBuf;
-import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +23,6 @@ public class WzFile {
     private final Path outPath;
     private final int version;
     private final byte[] secret;
-    @Getter
     private final WzDirectory root;
 
     public WzFile(Path inPath, Path outPath, int version, byte[] secret) {
@@ -34,6 +32,10 @@ public class WzFile {
         this.secret = secret;
         this.root = new WzDirectory("");
         init();
+    }
+
+    public WzDirectory getRoot() {
+        return root;
     }
 
     private void init() {
@@ -79,7 +81,7 @@ public class WzFile {
             return List.of();
         }
         try {
-            return new ListWzFile(listWz, secret).entries();
+            return new ListWzFile(listWz, version, secret).entries();
         } catch (Exception e) {
             logger.warn("Could not read {}. Strings in list-encoded files may not decode.", listWz, e);
             return List.of();

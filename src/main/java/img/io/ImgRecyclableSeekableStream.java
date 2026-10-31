@@ -2,25 +2,23 @@ package img.io;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * A recyclable seekable stream built on top of Netty's {@link ByteBuf}.
  * Designed for efficient in-memory binary file reading with support for random access (seeking).
  */
 public class ImgRecyclableSeekableStream implements AutoCloseable {
-
-    Logger log = LoggerFactory.getLogger(ImgRecyclableSeekableStream.class);
-
     private static final Charset ASCII = StandardCharsets.US_ASCII;
 
-    private Path path;
+    private final Path path;
     private ByteBuf readBuf;
 
 
@@ -38,26 +36,17 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @param path the path to the file to read
      */
     public ImgRecyclableSeekableStream(Path path) {
-        this.path = path;
+        this.path = Objects.requireNonNull(path, "Path cannot be null");
         try {
-            byte[] data = Files.readAllBytes(path);
-            readBuf = Unpooled.wrappedBuffer(data);
-        } catch (Exception e) {
-            log.error("An error has occurred while loading the file to memory. ", e);
+            readBuf = Unpooled.wrappedBuffer(Files.readAllBytes(path));
+        } catch (IOException e) {
+            throw new UncheckedIOException("An error has occurred while loading the file to memory. " + path, e);
         }
     }
 
     public ImgRecyclableSeekableStream(Path path, byte[] data) {
-        this.path = path;
-        try {
-            readBuf = Unpooled.wrappedBuffer(data);
-        } catch (Exception e) {
-            log.error("An error has occurred while loading the file to memory. ", e);
-        }
-    }
-
-    public ImgRecyclableSeekableStream(ByteBuf readBuf) {
-        this.readBuf = readBuf;
+        this.path = Objects.requireNonNull(path, "Path cannot be null");
+        readBuf = Unpooled.wrappedBuffer(data);
     }
 
     /**
@@ -76,13 +65,10 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the byte array read
      */
     public byte[] readBytes(int length) {
+        if (length < 0) throw new IllegalArgumentException("negative length: " + length);
         byte[] bytes = new byte[length];
         readBuf.readBytes(bytes);
         return bytes;
-    }
-
-    public void readFully(byte[] b) {
-        readBuf.readBytes(b);
     }
 
     /**
@@ -166,7 +152,7 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @return the resulting string
      */
     public final String readMapleAsciiString() {
-        short len = readShort();
+        int len = readShort() & 0xFFFF;
         return readAsciiString(len);
     }
 
@@ -177,12 +163,10 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      */
     public String readNullTerminatedAsciiString() {
         StringBuilder sb = new StringBuilder();
-        byte b = 1;
-        while (b != 0) {
-            b = readByte();
-            if (b != 0) {
-                sb.append((char) b);
-            }
+        while (readBuf.isReadable()) {
+            int b = readByte() & 0xFF;
+            if (b == 0) break;
+            sb.append((char) b);
         }
         return sb.toString();
     }
@@ -202,6 +186,9 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * @param offset the target offset to seek to
      */
     public void seek(long offset) {
+        if (offset < 0 || offset > readBuf.capacity()) {
+            throw new IndexOutOfBoundsException("offset " + offset + " out of [0," + readBuf.capacity() + "]");
+        }
         readBuf.readerIndex((int) offset);
     }
 
@@ -224,11 +211,11 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
     }
 
     /**
-     * Resets the buffer by clearing it (reader and writer index to 0).
+     * Resets the buffer by setting the reader index to 0.
      */
     public void reset() {
         if (readBuf != null) {
-            readBuf.clear();
+            readBuf.readerIndex(0);
         }
     }
 
@@ -236,16 +223,10 @@ public class ImgRecyclableSeekableStream implements AutoCloseable {
      * Releases the underlying {@link ByteBuf} and performs cleanup.
      */
     @Override
-    public synchronized void close() {
-        if (readBuf != null) {
-            try {
-                if (readBuf.refCnt() > 0) {
-                    readBuf.release();
-                }
-            } finally {
-                readBuf = null;
-            }
+    public void close() {
+        if (readBuf != null && readBuf.refCnt() > 0) {
+            readBuf.release();
         }
+        readBuf = null;
     }
-
 }

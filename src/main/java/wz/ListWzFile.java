@@ -1,5 +1,7 @@
 package wz;
 
+import img.crypto.WzKeyGenerator;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -21,6 +23,21 @@ public class ListWzFile {
 
     public ListWzFile(Path path, byte[] secret) {
         read(path, secret);
+    }
+
+    /**
+     * Reads List.wz with the string cipher of the given client version:
+     * v55 and below XOR with the classic ZLZ key chained from the v55
+     * IV (B9 7D 63 E9), later versions use the supplied secret.
+     *
+     * @param path the path to the List.wz file
+     * @param version the game version the file belongs to (e.g. 55)
+     * @param secret the per-version secret used by the modern scheme
+     */
+    public ListWzFile(Path path, int version, byte[] secret) {
+        read(path, version <= 55
+                ? WzKeyGenerator.generateWzKey(WzKeyGenerator.IV_BMS)
+                : secret);
     }
 
     /**

@@ -14,16 +14,21 @@ public class WzString {
 
     /*
      * String encryption eras, selected by client version:
-     *  - v55 and below: the classic alphabet cipher (the key table
-     *    degenerates to the plain 0xAA+i mask).
-     *  - v56 to v92 (v62 verified): the middle-era scheme — strings
-     *    additionally XOR the 64 KiB WzKey from WzKeyGenerator
-     *    (ZLZ.dll key material, GMS IV).
+     *  - v55 and below: the plain 0xAA+i / 0xAAAA+i mask for most
+     *    strings, PLUS the classic ZLZ key (chained from the v55 IV
+     *    B9 7D 63 E9) for img files listed in List.wz (Mob.wz's older
+     *    imgs are the known members).
+     *  - v56 to v92 (v62 verified): every string additionally XORs
+     *    the 64 KiB WzKey from WzKeyGenerator (GMS IV).
      *  - v93 onwards (v95 verified): the modern per-version secret
      *    scheme (the "modern img" branch below).
      */
     public WzString(int version, byte[] secret) {
-        if (version > 55 && version < 93) {
+        if (version <= 55) {
+            byte[] wzKey = WzKeyGenerator.generateWzKey(WzKeyGenerator.IV_BMS);
+            this.oUnicodeString = new WzUnicodeString(wzKey, true);
+            this.oAsciiString = new WzAsciiString(wzKey, new WzAlphabet().getAlphabet());
+        } else if (version < 93) {
             byte[] wzKey = WzKeyGenerator.generateWzKey();
             this.oUnicodeString = new WzUnicodeString(wzKey);
             this.oAsciiString = new WzAsciiString(secret, wzKey);

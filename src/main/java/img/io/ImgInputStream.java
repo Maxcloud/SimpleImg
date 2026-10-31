@@ -3,7 +3,6 @@ package img.io;
 import img.crypto.WzCryptography;
 import img.crypto.WzDecodeRecord;
 import img.crypto.WzString;
-import lombok.Getter;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -14,9 +13,7 @@ import java.util.Objects;
  */
 public class ImgInputStream extends ImgRecyclableSeekableStream {
 
-    @Getter
     private final WzString handle;
-    @Getter
     private final byte[] secret;
     private final boolean isListImg;
 
@@ -30,6 +27,14 @@ public class ImgInputStream extends ImgRecyclableSeekableStream {
         this.handle = handle;
         this.secret = secret;
         this.isListImg = handle.isListImg(path);
+    }
+
+    public WzString getHandle() {
+        return handle;
+    }
+
+    public byte[] getSecret() {
+        return secret;
     }
 
     /**

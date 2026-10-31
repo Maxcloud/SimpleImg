@@ -13,8 +13,10 @@ public class WzAsciiString implements IWzStringDecode {
     /**
      * Classic decryption with an explicit key table. The middle-era
      * wz files (v62 to v92) pass the 64 KiB key from
-     * {@link WzKeyGenerator}; v55-era files keep the default
-     * all-zero alphabet, degenerating to the plain 0xAA+i mask.
+     * {@link WzKeyGenerator} as both arguments, so every string is
+     * key-masked. The v55-and-below era passes the v55-IV key as the
+     * secret and the all-zero alphabet: only List.wz member files are
+     * key-masked, everything else carries the plain 0xAA+i mask.
      */
     public WzAsciiString(byte[] secret, byte[] alphabet) {
         this.secret = secret;

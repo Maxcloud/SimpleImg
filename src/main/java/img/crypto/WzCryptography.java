@@ -30,8 +30,10 @@ public class WzCryptography {
     public void setInitializationVector() {
         byte[] initial;
         if (version <= 55) {
-            // BMS classic era: zero IV. The derived key is all zeros, so
-            // strings carry nothing but the 0xAA+i / 0xAAAA+i masks.
+            // v55-era strings do not use this per-version table at all:
+            // plain strings carry only the 0xAA+i / 0xAAAA+i masks and
+            // List.wz member files use the classic ZLZ key chained from
+            // WzKeyGenerator.IV_BMS instead of this secret.
             initial = new byte[4];
         } else if (version >= 117) {
             initial = new byte[] {(byte) 0xB9, 0x7D, 0x63, (byte) 0xE9};

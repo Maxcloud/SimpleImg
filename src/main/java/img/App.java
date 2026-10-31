@@ -68,7 +68,7 @@ public class App implements Runnable {
             System.out.println("Extracting strings to JSON. Please wait, this might take awhile...");
             Path listWz = iPath.resolve("List.wz");
             List<String> entries = Files.isRegularFile(listWz)
-                    ? new ListWzFile(listWz, secret).entries()
+                    ? new ListWzFile(listWz, version, secret).entries()
                     : List.of();
             ExtractJsonService export = new ExtractJsonService(
                     version,

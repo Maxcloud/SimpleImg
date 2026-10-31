@@ -6,7 +6,7 @@
 
     <groupId>cdn.simpleimg</groupId>
     <artifactId>simpleimg</artifactId>
-    <version>1.5.5</version>
+    <version>1.5.6</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -55,13 +55,6 @@
             <artifactId>picocli</artifactId>
             <version>4.7.7</version>
             <scope>compile</scope>
-        </dependency>
-        <!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.42</version>
-            <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
