@@ -114,6 +114,7 @@ public class WzFile {
                                 FileChannel channel = fos.getChannel();
                                 bytes = channel.write(slice.nioBuffer());
                             } catch (Exception e) {
+                                slice.release();
                                 logger.error("An error occurred in the service, attempting to write the file.", e);
                             }
                             slice.release();
