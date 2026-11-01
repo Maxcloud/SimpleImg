@@ -25,10 +25,10 @@ public record WzValueReader(ImgRecyclableSeekableStream stream, WzPathNavigator 
      */
     public short readShort(String property, short value) {
         long offset = directory().getOffset(property);
-        stream.seek(offset);
         if (offset == -1) {
             return value;
         }
+        stream.seek(offset);
         var variant = stream.readByte();
 
         var b = stream.readByte();
